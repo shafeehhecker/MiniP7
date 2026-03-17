@@ -110,6 +110,7 @@ class ActivityTable(QWidget):
         self.table.setHorizontalHeaderLabels(COL_HEADERS)
         self.table.verticalHeader().setVisible(False)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)   # ← enforce single row selection
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setAlternatingRowColors(False)
         self.table.setShowGrid(True)
@@ -173,12 +174,12 @@ class ActivityTable(QWidget):
         row.addWidget(add_btn)
 
         edit_btn = QPushButton("Edit")
-        edit_btn.setObjectName("editBtn")
+        edit_btn.setObjectName("editBtn")          # ← added for potential future styling
         edit_btn.clicked.connect(self._on_edit_clicked)
         row.addWidget(edit_btn)
 
         del_btn = QPushButton("Delete")
-        del_btn.setObjectName("deleteBtn")
+        del_btn.setObjectName("deleteBtn")         # ← enables the #deleteBtn:hover CSS rule
         del_btn.clicked.connect(self._on_delete_clicked)
         row.addWidget(del_btn)
 
