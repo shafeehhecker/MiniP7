@@ -1,5 +1,6 @@
 """
-Main Window for Mini-P6 CPM Scheduler.
+Main Window for Mini-P6 CPM Scheduler – Light Theme.
+
 Layout:
   ┌─────────────────────────────────────────────────────┐
   │  Toolbar (Schedule button, Load sample, etc.)       │
@@ -10,34 +11,50 @@ Layout:
   │  Status Panel                                       │
   └─────────────────────────────────────────────────────┘
 """
-import sys
-from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QSplitter, QPushButton, QLabel, QFrame,
-    QMessageBox, QApplication
-)
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QIcon, QColor, QPalette
 
-from activity import Activity
-from scheduler import CPMScheduler, SchedulerError
-from db import (
-    init_db, load_all_activities, save_activity,
-    save_all_activities, delete_activity
-)
-from activity_table import ActivityTable
-from gantt_view import GanttView
-from activity_dialog import ActivityDialog
-from status_panel import StatusPanel
+import os
+import sys
 from typing import Dict
 
+# Local modules
+from activity import Activity
+from activity_dialog import ActivityDialog
+from activity_table import ActivityTable
+from db import (
+    delete_activity,
+    init_db,
+    load_all_activities,
+    save_activity,
+    save_all_activities,
+)
+from gantt_view import GanttView
+from PySide6.QtCore import QSettings, Qt
+from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtWidgets import (
+    QApplication,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMenuBar,
+    QMessageBox,
+    QPushButton,
+    QSplitter,
+    QVBoxLayout,
+    QWidget,
+)
+from scheduler import CPMScheduler, SchedulerError
+from status_panel import StatusPanel
 
+# ----------------------------------------------------------------------
+# Sample data
+# ----------------------------------------------------------------------
 SAMPLE_ACTIVITIES = [
-    Activity("A", "Start",      2, []),
+    Activity("A", "Start", 2, []),
     Activity("B", "Foundation", 4, ["A"]),
-    Activity("C", "Structure",  6, ["B"]),
+    Activity("C", "Structure", 6, ["B"]),
     Activity("D", "Electrical", 3, ["B"]),
-    Activity("E", "Finish",     2, ["C", "D"]),
+    Activity("E", "Finish", 2, ["C", "D"]),
 ]
 
 
@@ -46,6 +63,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._activities: Dict[str, Activity] = {}
         init_db()
+
+        # Restore window geometry from previous session
+        self._settings = QSettings("OpenPlan", "Mini-P6")
+        self.restoreGeometry(self._settings.value("geometry", b""))
+
         self._setup_window()
         self._setup_ui()
         self._load_from_db()
@@ -53,29 +75,17 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Window setup
     # ------------------------------------------------------------------
-
     def _setup_window(self):
+        """Set window title, minimum size, and initial size."""
         self.setWindowTitle("Mini-P6  |  CPM Scheduler")
         self.setMinimumSize(1100, 680)
         self.resize(1400, 780)
 
-        # Apply global dark palette
-        palette = QPalette()
-        palette.setColor(QPalette.Window,          QColor("#1e2530"))
-        palette.setColor(QPalette.WindowText,      QColor("#c8d8e8"))
-        palette.setColor(QPalette.Base,            QColor("#161e2a"))
-        palette.setColor(QPalette.AlternateBase,   QColor("#1a2230"))
-        palette.setColor(QPalette.Text,            QColor("#c8d8e8"))
-        palette.setColor(QPalette.Button,          QColor("#252d3a"))
-        palette.setColor(QPalette.ButtonText,      QColor("#c0ccd8"))
-        palette.setColor(QPalette.Highlight,       QColor("#1e4a6a"))
-        palette.setColor(QPalette.HighlightedText, QColor("#e0f0ff"))
-        QApplication.setPalette(palette)
+        # No hard‑coded palette – styling is handled by the light QSS below
 
     # ------------------------------------------------------------------
     # UI Construction
     # ------------------------------------------------------------------
-
     def _setup_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
@@ -83,17 +93,20 @@ class MainWindow(QMainWindow):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        # 1. Title bar
+        # 1. Menu bar
+        self._create_menu_bar()
+
+        # 2. Title bar (decorative, with light theme)
         root.addWidget(self._build_titlebar())
 
-        # 2. Toolbar
+        # 3. Toolbar
         root.addWidget(self._build_toolbar())
 
-        # 3. Main content split
+        # 4. Main content split (Activity table + Gantt)
         splitter = QSplitter(Qt.Horizontal)
         splitter.setStyleSheet("""
             QSplitter::handle {
-                background-color: #2a3545;
+                background-color: #c0c0c0;
                 width: 2px;
             }
         """)
@@ -110,16 +123,57 @@ class MainWindow(QMainWindow):
         splitter.setSizes([480, 720])
         root.addWidget(splitter)
 
-        # 4. Status bar
+        # 5. Status panel
         self.status_panel = StatusPanel()
         root.addWidget(self.status_panel)
 
+    def _create_menu_bar(self):
+        """Create the main menu bar with File, Edit, and Help menus."""
+        menubar = self.menuBar()
+
+        # File menu
+        file_menu = menubar.addMenu("&File")
+        new_action = QAction("&New Project", self)
+        new_action.setShortcut(QKeySequence.New)
+        new_action.triggered.connect(self._clear_all)
+        file_menu.addAction(new_action)
+
+        load_sample_action = QAction("&Load Sample Project", self)
+        load_sample_action.triggered.connect(self._load_sample)
+        file_menu.addAction(load_sample_action)
+
+        file_menu.addSeparator()
+
+        exit_action = QAction("E&xit", self)
+        exit_action.setShortcut(QKeySequence.Quit)
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+
+        # Edit menu
+        edit_menu = menubar.addMenu("&Edit")
+        add_action = QAction("&Add Activity", self)
+        add_action.setShortcut(QKeySequence("Ctrl+A"))
+        add_action.triggered.connect(self._on_add_activity)
+        edit_menu.addAction(add_action)
+
+        schedule_action = QAction("&Schedule", self)
+        schedule_action.setShortcut(QKeySequence("F5"))
+        schedule_action.triggered.connect(self._run_schedule)
+        edit_menu.addAction(schedule_action)
+
+        # Help menu
+        help_menu = menubar.addMenu("&Help")
+        about_action = QAction("&About", self)
+        about_action.triggered.connect(self._show_about)
+        help_menu.addAction(about_action)
+
     def _build_titlebar(self) -> QWidget:
+        """Decorative title bar with light theme."""
         bar = QFrame()
         bar.setStyleSheet("""
             QFrame {
-                background-color: #0f1620;
-                border-bottom: 2px solid #1e3a52;
+                background-color: #e0e0e0;
+                border-bottom: 2px solid #a0a0a0;
             }
         """)
         bar.setFixedHeight(46)
@@ -132,57 +186,60 @@ class MainWindow(QMainWindow):
         row.addWidget(logo)
 
         title = QLabel("Mini-P6")
-        title.setStyleSheet("color: #90b8d8; font-size: 18px; font-weight: bold; letter-spacing: 1px; margin-left: 6px;")
+        title.setStyleSheet(
+            "color: #202020; font-size: 18px; font-weight: bold; letter-spacing: 1px; margin-left: 6px;"
+        )
         row.addWidget(title)
 
         sub = QLabel("CPM Scheduler")
-        sub.setStyleSheet("color: #3a5a78; font-size: 12px; margin-left: 4px; margin-top: 4px;")
+        sub.setStyleSheet(
+            "color: #505050; font-size: 12px; margin-left: 4px; margin-top: 4px;"
+        )
         row.addWidget(sub)
 
         row.addStretch()
 
         help_lbl = QLabel("Double-click a row to edit  •  Drag splitter to resize")
-        help_lbl.setStyleSheet("color: #2a4a62; font-size: 11px;")
+        help_lbl.setStyleSheet("color: #606060; font-size: 11px;")
         row.addWidget(help_lbl)
 
         return bar
 
     def _build_toolbar(self) -> QWidget:
+        """Create the toolbar with light‑theme buttons."""
         bar = QFrame()
         bar.setStyleSheet("""
             QFrame {
-                background-color: #161e2a;
-                border-bottom: 1px solid #2a3545;
+                background-color: #f0f0f0;
+                border-bottom: 1px solid #b0b0b0;
             }
             QPushButton {
-                background-color: #1e2d3e;
-                color: #7090a8;
-                border: 1px solid #2a3a4a;
+                background-color: #ffffff;
+                color: #202020;
+                border: 1px solid #b0b0b0;
                 border-radius: 4px;
                 padding: 6px 18px;
                 font-size: 12px;
                 min-width: 80px;
             }
             QPushButton:hover {
-                background-color: #253545;
-                color: #90b8d8;
+                background-color: #e0e0e0;
             }
             QPushButton#scheduleBtn {
-                background-color: #1a4a70;
-                color: #78c8f8;
-                border: 1px solid #2a6a98;
+                background-color: #2a7ab0;
+                color: #ffffff;
+                border: 1px solid #1e5a8a;
                 font-weight: bold;
                 font-size: 13px;
                 padding: 6px 24px;
             }
             QPushButton#scheduleBtn:hover {
-                background-color: #206090;
-                color: #a8e0ff;
+                background-color: #1e6aa0;
             }
             QPushButton#clearBtn:hover {
-                background-color: #3d1e22;
-                color: #e05060;
-                border-color: #6a2030;
+                background-color: #f0d0d0;
+                color: #a00000;
+                border-color: #c06060;
             }
         """)
         bar.setFixedHeight(48)
@@ -191,32 +248,43 @@ class MainWindow(QMainWindow):
         row.setContentsMargins(12, 6, 12, 6)
         row.setSpacing(10)
 
+        # Helper to load icons if available
+        def icon_path(name):
+            return os.path.join(os.path.dirname(__file__), "resources", "icons", name)
+
         # Sample data button
-        sample_btn = QPushButton("Load Sample Project")
+        sample_btn = QPushButton(" Load Sample")
+        if os.path.isfile(icon_path("sample.png")):
+            sample_btn.setIcon(QIcon(icon_path("sample.png")))
         sample_btn.clicked.connect(self._load_sample)
+        sample_btn.setToolTip("Load the built‑in sample project (replaces current)")
         row.addWidget(sample_btn)
 
         # Clear button
-        clear_btn = QPushButton("Clear All")
+        clear_btn = QPushButton(" Clear All")
         clear_btn.setObjectName("clearBtn")
+        if os.path.isfile(icon_path("clear.png")):
+            clear_btn.setIcon(QIcon(icon_path("clear.png")))
         clear_btn.clicked.connect(self._clear_all)
+        clear_btn.setToolTip("Delete all activities")
         row.addWidget(clear_btn)
 
         row.addStretch()
 
         # Schedule button (hero action)
-        schedule_btn = QPushButton("▶  Schedule")
+        schedule_btn = QPushButton(" ▶  Schedule")
         schedule_btn.setObjectName("scheduleBtn")
-        schedule_btn.setToolTip("Run CPM forward/backward pass and update Gantt")
+        if os.path.isfile(icon_path("schedule.png")):
+            schedule_btn.setIcon(QIcon(icon_path("schedule.png")))
+        schedule_btn.setToolTip("Run CPM forward/backward pass (F5)")
         schedule_btn.clicked.connect(self._run_schedule)
         row.addWidget(schedule_btn)
 
         return bar
 
     # ------------------------------------------------------------------
-    # Data loading
+    # Data loading / saving
     # ------------------------------------------------------------------
-
     def _load_from_db(self):
         self._activities = load_all_activities()
         self._refresh_ui()
@@ -230,14 +298,14 @@ class MainWindow(QMainWindow):
         self.gantt_view.render_gantt(self._activities)
 
     # ------------------------------------------------------------------
-    # Toolbar actions
+    # Menu / toolbar actions
     # ------------------------------------------------------------------
-
     def _load_sample(self):
         reply = QMessageBox.question(
-            self, "Load Sample",
+            self,
+            "Load Sample",
             "This will replace the current project with sample data.\nContinue?",
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No,
         )
         if reply != QMessageBox.Yes:
             return
@@ -254,15 +322,18 @@ class MainWindow(QMainWindow):
             save_activity(a)
 
         self._refresh_ui()
-        self.status_panel.set_message("Sample project loaded. Click ▶ Schedule to compute CPM.")
+        self.status_panel.set_message(
+            "Sample project loaded. Click ▶ Schedule to compute CPM."
+        )
 
     def _clear_all(self):
         if not self._activities:
             return
         reply = QMessageBox.question(
-            self, "Clear All",
+            self,
+            "Clear All",
             "Delete all activities? This cannot be undone.",
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No,
         )
         if reply != QMessageBox.Yes:
             return
@@ -289,15 +360,23 @@ class MainWindow(QMainWindow):
             self.status_panel.set_message(str(e), error=True)
             QMessageBox.critical(self, "Scheduling Error", str(e))
 
+    def _show_about(self):
+        from main import APP_NAME, APP_VERSION, ORGANIZATION_URL
+
+        QMessageBox.about(
+            self,
+            f"About {APP_NAME}",
+            f"<b>{APP_NAME}</b> version {APP_VERSION}<br>"
+            f"A modern CPM scheduling tool.<br>"
+            f"<a href='{ORGANIZATION_URL}'>{ORGANIZATION_URL}</a><br><br>"
+            "Built with PySide6.",
+        )
+
     # ------------------------------------------------------------------
     # Activity CRUD (from table signals)
     # ------------------------------------------------------------------
-
     def _on_add_activity(self):
-        dlg = ActivityDialog(
-            parent=self,
-            existing_ids=list(self._activities.keys())
-        )
+        dlg = ActivityDialog(parent=self, existing_ids=list(self._activities.keys()))
         if dlg.exec():
             act = dlg.get_activity()
             self._activities[act.id] = act
@@ -313,7 +392,7 @@ class MainWindow(QMainWindow):
         dlg = ActivityDialog(
             parent=self,
             activity=self._activities[act_id],
-            existing_ids=list(self._activities.keys())
+            existing_ids=list(self._activities.keys()),
         )
         if dlg.exec():
             updated = dlg.get_activity()
@@ -326,9 +405,10 @@ class MainWindow(QMainWindow):
 
     def _on_delete_activity(self, act_id: str):
         reply = QMessageBox.question(
-            self, "Delete Activity",
+            self,
+            "Delete Activity",
             f"Delete activity '{act_id}'?",
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No,
         )
         if reply != QMessageBox.Yes:
             return
@@ -338,3 +418,11 @@ class MainWindow(QMainWindow):
         self.status_panel.set_message(
             f"Activity '{act_id}' deleted. Click ▶ Schedule to update CPM."
         )
+
+    # ------------------------------------------------------------------
+    # Event overrides
+    # ------------------------------------------------------------------
+    def closeEvent(self, event):
+        """Save window geometry when closing."""
+        self._settings.setValue("geometry", self.saveGeometry())
+        super().closeEvent(event)
