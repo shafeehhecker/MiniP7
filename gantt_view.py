@@ -1,9 +1,9 @@
 """
-Gantt Chart widget.
+Gantt Chart widget – Light Theme.
 Draws horizontal Gantt bars on a QGraphicsScene with:
   - Timeline header
   - Activity bars (colour-coded: critical = red, normal = steel blue)
-  - Float bars (greyed)
+  - Float bars (light grey)
   - Activity name labels on bars
 """
 from PySide6.QtWidgets import (
@@ -21,7 +21,7 @@ from typing import Dict
 from activity import Activity
 
 
-# Layout constants
+# Layout constants (unchanged)
 ROW_H       = 32      # height of each Gantt row (pixels)
 ROW_PAD     = 4       # vertical padding inside row
 LABEL_W     = 160     # left column (activity name)
@@ -29,21 +29,23 @@ DAY_W       = 28      # pixels per day
 HEADER_H    = 36      # height of timeline header
 MIN_DAYS    = 20      # minimum timeline width (days)
 
-# Colours
-CLR_BG          = "#1e2530"
-CLR_HEADER_BG   = "#151c26"
-CLR_HEADER_FG   = "#4a6a8a"
-CLR_GRID        = "#232e3c"
-CLR_LABEL_FG    = "#8aa8c0"
-CLR_BAR_NORMAL  = "#2a6090"
-CLR_BAR_CRIT    = "#9e2a30"
-CLR_BAR_FLOAT   = "#253040"
-CLR_BAR_CRIT_BORDER  = "#e04050"
-CLR_BAR_NRM_BORDER   = "#4090c0"
-CLR_BAR_TEXT    = "#e0eefa"
-CLR_TODAY_LINE  = "#e8b840"
-CLR_ROW_EVEN    = "#1a2230"
-CLR_ROW_ODD     = "#1e2838"
+# ================== LIGHT THEME COLOURS ==================
+CLR_BG              = "#f8f8f8"       # main background
+CLR_HEADER_BG       = "#e8e8e8"       # header background
+CLR_HEADER_FG       = "#505050"       # header text
+CLR_GRID            = "#d0d0d0"       # grid lines
+CLR_LABEL_FG        = "#202020"       # activity name text
+CLR_BAR_NORMAL      = "#3a7ca5"       # steel blue for normal bars
+CLR_BAR_CRIT        = "#c04040"       # red for critical bars
+CLR_BAR_FLOAT       = "#d3d3d3"       # light grey for float background
+CLR_BAR_CRIT_BORDER = "#a03030"       # darker red border for critical
+CLR_BAR_NRM_BORDER  = "#2a5a80"       # darker blue border for normal
+CLR_BAR_TEXT        = "#ffffff"       # white text on bars
+CLR_TODAY_LINE      = "#e8b840"       # gold (kept for today marker)
+CLR_ROW_EVEN        = "#ffffff"       # white even rows
+CLR_ROW_ODD         = "#f2f2f2"       # light grey odd rows
+CLR_LABEL_COLUMN_BG = "#ececec"       # left column background
+# ==========================================================
 
 
 class GanttView(QWidget):
@@ -67,8 +69,16 @@ class GanttView(QWidget):
         # Toolbar strip
         toolbar = QFrame()
         toolbar.setStyleSheet(f"""
-            QFrame {{ background-color: {CLR_HEADER_BG}; border-bottom: 1px solid #2a3545; }}
-            QLabel {{ color: #4a6a8a; font-size: 10px; font-weight: bold; letter-spacing: 1px; }}
+            QFrame {{
+                background-color: {CLR_HEADER_BG};
+                border-bottom: 1px solid #c0c0c0;
+            }}
+            QLabel {{
+                color: #404040;
+                font-size: 10px;
+                font-weight: bold;
+                letter-spacing: 1px;
+            }}
         """)
         tb_row = QHBoxLayout(toolbar)
         tb_row.setContentsMargins(12, 7, 12, 7)
@@ -76,10 +86,10 @@ class GanttView(QWidget):
         tb_row.addWidget(lbl)
         tb_row.addStretch()
         legend_crit = QLabel("■ Critical Path")
-        legend_crit.setStyleSheet(f"color: {CLR_BAR_CRIT_BORDER}; font-size: 11px;")
+        legend_crit.setStyleSheet(f"color: {CLR_BAR_CRIT}; font-size: 11px;")
         tb_row.addWidget(legend_crit)
         legend_norm = QLabel("■ Normal")
-        legend_norm.setStyleSheet(f"color: {CLR_BAR_NRM_BORDER}; font-size: 11px; margin-left: 10px;")
+        legend_norm.setStyleSheet(f"color: {CLR_BAR_NORMAL}; font-size: 11px; margin-left: 10px;")
         tb_row.addWidget(legend_norm)
         layout.addWidget(toolbar)
 
@@ -94,12 +104,12 @@ class GanttView(QWidget):
                 border: none;
             }}
             QScrollBar:horizontal, QScrollBar:vertical {{
-                background: #1a2230;
+                background: #e0e0e0;
                 height: 10px; width: 10px;
                 border-radius: 5px;
             }}
             QScrollBar::handle:horizontal, QScrollBar::handle:vertical {{
-                background: #3a4a5a;
+                background: #a0a0a0;
                 border-radius: 5px;
             }}
         """)
@@ -142,7 +152,7 @@ class GanttView(QWidget):
     def _draw_empty_state(self):
         self.scene.setSceneRect(0, 0, 600, 200)
         msg = QGraphicsTextItem("No scheduled data.\nAdd activities and click  ▶ Schedule  to compute the CPM.")
-        msg.setDefaultTextColor(QColor("#3a5070"))
+        msg.setDefaultTextColor(QColor("#808080"))
         font = QFont("Consolas", 12)
         msg.setFont(font)
         msg.setPos(80, 70)
@@ -151,7 +161,7 @@ class GanttView(QWidget):
     def _draw_background(self, total_days: int, row_count: int):
         # Left label column background
         label_rect = QGraphicsRectItem(0, HEADER_H, LABEL_W, row_count * ROW_H)
-        label_rect.setBrush(QBrush(QColor("#161e28")))
+        label_rect.setBrush(QBrush(QColor(CLR_LABEL_COLUMN_BG)))
         label_rect.setPen(QPen(Qt.NoPen))
         self.scene.addItem(label_rect)
 
@@ -173,7 +183,7 @@ class GanttView(QWidget):
             self.scene.addItem(line)
 
         # Horizontal row dividers
-        pen_div = QPen(QColor("#222d3c"), 1)
+        pen_div = QPen(QColor("#c0c0c0"), 1)
         for r in range(row_count + 1):
             y = HEADER_H + r * ROW_H
             divider = QGraphicsLineItem(0, y, LABEL_W + total_days * DAY_W, y)
@@ -196,7 +206,7 @@ class GanttView(QWidget):
 
         # Day numbers
         font_day = QFont("Consolas", 9)
-        pen_hdr_line = QPen(QColor("#2a3a4a"), 1)
+        pen_hdr_line = QPen(QColor("#b0b0b0"), 1)
 
         for d in range(0, total_days + 1, 5):
             x = LABEL_W + d * DAY_W
@@ -214,7 +224,7 @@ class GanttView(QWidget):
 
         # Header bottom border
         hdr_line = QGraphicsLineItem(0, HEADER_H, LABEL_W + total_days * DAY_W + 20, HEADER_H)
-        hdr_line.setPen(QPen(QColor("#2a3a4a"), 2))
+        hdr_line.setPen(QPen(QColor("#b0b0b0"), 2))
         self.scene.addItem(hdr_line)
 
     def _draw_bars(self, activities: Dict[str, Activity], total_days: int):
@@ -229,7 +239,11 @@ class GanttView(QWidget):
 
             # ---- Activity name label (left column) ----
             lbl = QGraphicsTextItem(f"  {act.id}  {act.name}")
-            lbl.setDefaultTextColor(QColor("#c8d8e8") if act.is_critical else QColor(CLR_LABEL_FG))
+            # Critical activities use a darker red text to stand out
+            if act.is_critical:
+                lbl.setDefaultTextColor(QColor("#a00000"))
+            else:
+                lbl.setDefaultTextColor(QColor(CLR_LABEL_FG))
             lbl.setFont(font_lbl)
             lbl.setPos(4, y + (ROW_H - 16) // 2)
             # Clip to label column
@@ -246,7 +260,7 @@ class GanttView(QWidget):
                 fw = act.total_float * DAY_W
                 float_bar = QGraphicsRectItem(fx, bar_y + 6, fw, bar_h - 12)
                 float_bar.setBrush(QBrush(QColor(CLR_BAR_FLOAT)))
-                float_bar.setPen(QPen(QColor("#2e3e50"), 1))
+                float_bar.setPen(QPen(QColor("#a0a0a0"), 1))
                 float_bar.setZValue(1)
                 self.scene.addItem(float_bar)
 
@@ -278,5 +292,5 @@ class GanttView(QWidget):
 
         # Vertical line at day 0
         d0_line = QGraphicsLineItem(LABEL_W, 0, LABEL_W, HEADER_H + len(activities) * ROW_H)
-        d0_line.setPen(QPen(QColor("#2a3a4a"), 2))
+        d0_line.setPen(QPen(QColor("#b0b0b0"), 2))
         self.scene.addItem(d0_line)
