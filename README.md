@@ -1,7 +1,6 @@
-# Mini-P6 — CPM Scheduler
+# Mini-P7 — CPM Scheduler
 
 A desktop Critical Path Method (CPM) scheduler built with **Python + PySide6**.  
-Inspired by Primavera P6 — lean, clean, and educational.
 
 ---
 
