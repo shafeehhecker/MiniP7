@@ -20,36 +20,43 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional, Tuple
 
 
 # ---------------------------------------------------------------------------
 # Helper utilities
 # ---------------------------------------------------------------------------
 
-def _parse_predecessors(value: Any) -> List[str]:
+def _parse_predecessors(value: Any) -> Tuple[str, ...]:
     """
-    Normalise a predecessor specification into a list of activity-ID strings.
+    Normalise a predecessor specification into a tuple of activity‑ID strings.
 
     Accepts:
         - A list already in the correct form: ``["A", "B"]``
-        - A comma-separated string:          ``"A, B"``
+        - A comma‑separated string:          ``"A, B"``
         - An empty string / None:            ``""`` / ``None``
+
+    Returns a tuple of stripped, non‑empty strings.
     """
     if value is None:
-        return []
-    if isinstance(value, list):
-        return [str(p).strip() for p in value if str(p).strip()]
+        return ()
+    if isinstance(value, (list, tuple)):
+        # Normalise each element and filter out empties
+        return tuple(p.strip() for p in value if isinstance(p, str) and p.strip())
     if isinstance(value, str):
-        return [p.strip() for p in value.split(",") if p.strip()]
-    raise TypeError(f"predecessors must be a list or comma-separated string, got {type(value)}")
+        # Split on commas and normalise
+        parts = [p.strip() for p in value.split(",") if p.strip()]
+        return tuple(parts)
+    raise TypeError(
+        f"predecessors must be a list, tuple, or comma‑separated string, got {type(value)}"
+    )
 
 
 # ---------------------------------------------------------------------------
 # Main dataclass
 # ---------------------------------------------------------------------------
 
-@dataclass
+@dataclass(slots=True)          # <-- reduces memory overhead
 class Activity:
     """
     Represents a single CPM project activity.
@@ -59,14 +66,14 @@ class Activity:
     id : str
         Unique identifier for the activity (e.g. ``"A"``, ``"T10"``).
     name : str
-        Human-readable activity name / description.
+        Human‑readable activity name / description.
     duration : int
         Activity duration in the project's time unit (days, weeks, …).
-        Must be a non-negative integer.
-    predecessors : list[str] | str, optional
+        Must be a non‑negative integer.
+    predecessors : tuple[str, ...], optional
         IDs of activities that must finish before this one can start
-        (Finish-to-Start relationships only).  Accepts a Python list *or*
-        a comma-separated string for easy CSV import.
+        (Finish‑to‑Start relationships only).  Must be a tuple of stripped,
+        non‑empty strings.  Use `from_dict` to import from CSV/JSON.
     resource : str, optional
         Responsible resource / team name (informational, not used in CPM math).
     description : str, optional
@@ -75,7 +82,7 @@ class Activity:
     CPM Computed Fields (set by the scheduler, not the user)
     --------------------------------------------------------
     ES, EF, LS, LF : int
-        Forward- and backward-pass schedule dates.
+        Forward‑ and backward‑pass schedule dates.
     total_float : int
         Total float (= LS - ES).
     free_float : int
@@ -85,13 +92,13 @@ class Activity:
         ``True`` when total_float == 0 (activity lies on the critical path).
     """
 
-    # --- Required user-supplied fields ---
+    # --- Required user‑supplied fields ---
     id: str
     name: str
     duration: int
 
-    # --- Optional user-supplied fields ---
-    predecessors: List[str] = field(default_factory=list)
+    # --- Optional user‑supplied fields ---
+    predecessors: Tuple[str, ...] = field(default_factory=tuple)
     resource: Optional[str] = None
     description: Optional[str] = None
 
@@ -105,39 +112,45 @@ class Activity:
     is_critical: bool = False
 
     # ------------------------------------------------------------------ #
-    # Initialisation & validation                                          #
+    # Initialisation & validation                                        #
     # ------------------------------------------------------------------ #
 
     def __post_init__(self) -> None:
         """Validate inputs and normalise predecessors after construction."""
-
-        # Normalise id
-        self.id = str(self.id).strip()
+        # Normalise id and name
+        self.id = self.id.strip()
         if not self.id:
-            raise ValueError("Activity 'id' must be a non-empty string.")
+            raise ValueError("Activity 'id' must be a non‑empty string.")
 
-        # Normalise name
-        self.name = str(self.name).strip()
+        self.name = self.name.strip()
         if not self.name:
-            raise ValueError("Activity 'name' must be a non-empty string.")
+            raise ValueError("Activity 'name' must be a non‑empty string.")
 
         # Validate duration
         if not isinstance(self.duration, int) or self.duration < 0:
             raise ValueError(
-                f"Activity duration must be a non-negative integer, got {self.duration!r}."
+                f"Activity duration must be a non‑negative integer, got {self.duration!r}."
             )
 
-        # Normalise predecessors (accept list *or* comma-separated string)
-        self.predecessors = _parse_predecessors(self.predecessors)
+        # Ensure predecessors is a tuple (convert if needed)
+        if not isinstance(self.predecessors, tuple):
+            self.predecessors = tuple(self.predecessors)
 
-        # Guard: an activity cannot be its own predecessor
+        # Validate each predecessor
+        for p in self.predecessors:
+            if not isinstance(p, str) or not p.strip():
+                raise ValueError(
+                    f"Each predecessor must be a non‑empty string, got {p!r}."
+                )
+
+        # Guard against self‑loop
         if self.id in self.predecessors:
             raise ValueError(
-                f"Activity '{self.id}' lists itself as a predecessor, which would create a self-loop."
+                f"Activity '{self.id}' lists itself as a predecessor, which would create a self‑loop."
             )
 
     # ------------------------------------------------------------------ #
-    # Computed properties                                                  #
+    # Computed properties                                                #
     # ------------------------------------------------------------------ #
 
     @property
@@ -151,7 +164,7 @@ class Activity:
         return self.total_float > 0
 
     # ------------------------------------------------------------------ #
-    # CPM helpers (called by the scheduler)                                #
+    # CPM helpers (called by the scheduler)                              #
     # ------------------------------------------------------------------ #
 
     def compute_early_finish(self) -> None:
@@ -177,7 +190,7 @@ class Activity:
         """
         Reset all CPM computed fields to their default values.
 
-        Useful when re-running the scheduler on a modified network without
+        Useful when re‑running the scheduler on a modified network without
         creating new Activity objects.
         """
         self.ES = 0
@@ -189,14 +202,14 @@ class Activity:
         self.is_critical = False
 
     # ------------------------------------------------------------------ #
-    # Serialisation                                                        #
+    # Serialisation                                                      #
     # ------------------------------------------------------------------ #
 
     def to_dict(self) -> Dict[str, Any]:
         """
         Serialise the activity to a plain dictionary.
 
-        The ``predecessors`` list is stored as a comma-separated string so
+        The ``predecessors`` tuple is stored as a comma‑separated string so
         the dict can be written directly to CSV / Excel rows.
         """
         return {
@@ -234,7 +247,7 @@ class Activity:
             id=str(data["id"]).strip(),
             name=str(data["name"]).strip(),
             duration=int(data["duration"]),
-            predecessors=preds,
+            predecessors=preds,              # already a tuple of stripped strings
             resource=data.get("resource") or None,
             description=data.get("description") or None,
             ES=int(data.get("ES", 0)),
@@ -252,12 +265,12 @@ class Activity:
         return cls.from_dict(json.loads(json_str))
 
     # ------------------------------------------------------------------ #
-    # Display helpers                                                      #
+    # Display helpers                                                    #
     # ------------------------------------------------------------------ #
 
     def summary(self) -> str:
         """
-        Return a single-line human-readable summary of the activity.
+        Return a single‑line human‑readable summary of the activity.
 
         Example output::
 
