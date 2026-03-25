@@ -1,5 +1,5 @@
 """
-Activity data model for Mini-P6 CPM Scheduler.
+Activity data model for Mini-P7 CPM Scheduler.
 
 This module defines the `Activity` dataclass, which represents a single project
 activity (task) in a Critical Path Method (CPM) network. Each activity stores
