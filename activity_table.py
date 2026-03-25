@@ -1,5 +1,10 @@
 """
 Activity Table widget — the core grid showing all CPM fields.
+
+Fixes applied
+-------------
+* predecessors isinstance check corrected: Activity stores a tuple, not a list.
+* Free Float (FF) column added to the grid.
 """
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget,
@@ -15,16 +20,18 @@ from typing import Dict, Optional
 
 # Column definitions: (header label, attribute name, width)
 COLUMNS = [
-    ("ID",          "id",          70),
-    ("Activity Name","name",       200),
-    ("Dur",         "duration",    55),
-    ("Predecessors","predecessors",110),
-    ("ES",          "ES",          55),
-    ("EF",          "EF",          55),
-    ("LS",          "LS",          55),
-    ("LF",          "LF",          55),
-    ("Float",       "total_float", 60),
-    ("Critical",    "is_critical", 70),
+    ("ID",           "id",           70),
+    ("Activity Name","name",        200),
+    ("Dur",          "duration",     55),
+    ("Predecessors", "predecessors", 110),
+    ("Resource",     "resource",     90),
+    ("ES",           "ES",           55),
+    ("EF",           "EF",           55),
+    ("LS",           "LS",           55),
+    ("LF",           "LF",           55),
+    ("TF",           "total_float",  55),
+    ("FF",           "free_float",   55),   # FIX: added free float column
+    ("Critical",     "is_critical",  70),
 ]
 
 COL_HEADERS  = [c[0] for c in COLUMNS]
@@ -210,7 +217,10 @@ class ActivityTable(QWidget):
 
             # Format value for display
             if attr == "predecessors":
-                text = ",".join(value) if isinstance(value, list) else str(value)
+                # FIX: Activity.predecessors is a tuple, not a list
+                text = ",".join(value) if isinstance(value, (list, tuple)) else str(value)
+            elif attr == "resource":
+                text = value or ""
             elif attr == "is_critical":
                 text = "★ YES" if value else ""
             else:
@@ -225,7 +235,7 @@ class ActivityTable(QWidget):
                 item.setForeground(QBrush(CLR_CRITICAL_FG if attr == "is_critical" else CLR_TEXT))
             elif attr == "total_float" and act.total_float == 0 and act.EF > 0:
                 item.setForeground(QBrush(CLR_FLOAT_ZERO))
-            elif attr in ("ES", "EF", "LS", "LF", "total_float") and act.EF == 0:
+            elif attr in ("ES", "EF", "LS", "LF", "total_float", "free_float") and act.EF == 0:
                 item.setForeground(QBrush(CLR_DIM))
             else:
                 item.setForeground(QBrush(CLR_TEXT))

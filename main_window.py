@@ -1,60 +1,62 @@
 """
-Main Window for Mini-P7 CPM Scheduler – Light Theme.
+Main Window for Mini-P7 CPM Scheduler – Phase 2.
 
 Layout:
   ┌─────────────────────────────────────────────────────┐
-  │  Toolbar (Schedule button, Load sample, etc.)       │
+  │  Menu bar (File / Edit / Export / Help)             │
+  ├─────────────────────────────────────────────────────┤
+  │  Title bar                                          │
+  ├─────────────────────────────────────────────────────┤
+  │  Toolbar                                            │
   ├──────────────────────┬──────────────────────────────┤
-  │   Activity Table     │     Gantt Chart              │
-  │   (left 45%)         │     (right 55%)              │
+  │   Activity Table     │  Tab: Gantt | Resource       │
+  │   (left 42%)         │  (right 58%)                 │
   ├──────────────────────┴──────────────────────────────┤
   │  Status Panel                                       │
   └─────────────────────────────────────────────────────┘
+
+Phase 2 additions
+-----------------
+  * File → Project Settings  (name + start date)
+  * File → Import P6 XML
+  * Export → Excel / PDF / P6 XML
+  * Resource Loading tab alongside Gantt
+  * Free Float column in activity table
+  * All Phase 1 bugs fixed
 """
 
-import os
-import sys
-from typing import Dict
+from __future__ import annotations
 
-# Local modules
+import os
+from datetime import date
+from typing import Dict, Optional
+
 from activity import Activity
 from activity_dialog import ActivityDialog
 from activity_table import ActivityTable
-from db import (
-    delete_activity,
-    init_db,
-    load_all_activities,
-    save_activity,
-    save_all_activities,
-)
+from db import delete_activity, init_db, load_all_activities, save_activity, save_all_activities
 from gantt_view import GanttView
+from project_settings_dialog import ProjectSettingsDialog
+from resource_panel import ResourcePanel
 from PySide6.QtCore import QSettings, Qt
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
-    QApplication,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QMainWindow,
-    QMenuBar,
-    QMessageBox,
-    QPushButton,
-    QSplitter,
-    QVBoxLayout,
-    QWidget,
+    QApplication, QFileDialog, QFrame, QHBoxLayout, QLabel,
+    QMainWindow, QMessageBox, QPushButton, QSplitter,
+    QTabWidget, QVBoxLayout, QWidget,
 )
 from scheduler import CPMScheduler, SchedulerError
 from status_panel import StatusPanel
 
-# ----------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Sample data
-# ----------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 SAMPLE_ACTIVITIES = [
-    Activity("A", "Start", 2, []),
-    Activity("B", "Foundation", 4, ["A"]),
-    Activity("C", "Structure", 6, ["B"]),
-    Activity("D", "Electrical", 3, ["B"]),
-    Activity("E", "Finish", 2, ["C", "D"]),
+    Activity("A", "Start",      2, ()),
+    Activity("B", "Foundation", 4, ("A",)),
+    Activity("C", "Structure",  6, ("B",)),
+    Activity("D", "Electrical", 3, ("B",), resource="Electrical Team"),
+    Activity("E", "Finish",     2, ("C", "D")),
 ]
 
 
@@ -62,10 +64,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self._activities: Dict[str, Activity] = {}
-        init_db()
+        self._project_name: str = "My Project"
+        self._start_date: Optional[date] = None
+        self._calendar_type: str = "Mon-Fri"
 
-        # Restore window geometry from previous session
-        self._settings = QSettings("OpenPlan", "Mini-P6")
+        init_db()
+        self._settings = QSettings("OpenPlan", "Mini-P7")
         self.restoreGeometry(self._settings.value("geometry", b""))
 
         self._setup_window()
@@ -75,17 +79,16 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Window setup
     # ------------------------------------------------------------------
-    def _setup_window(self):
-        """Set window title, minimum size, and initial size."""
-        self.setWindowTitle("Mini-P7  |  CPM Scheduler")
-        self.setMinimumSize(1100, 680)
-        self.resize(1400, 780)
 
-        # No hard‑coded palette – styling is handled by the light QSS below
+    def _setup_window(self):
+        self.setWindowTitle("Mini-P7  |  CPM Scheduler  |  Phase 2")
+        self.setMinimumSize(1100, 680)
+        self.resize(1440, 820)
 
     # ------------------------------------------------------------------
     # UI Construction
     # ------------------------------------------------------------------
+
     def _setup_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
@@ -93,105 +96,150 @@ class MainWindow(QMainWindow):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        # 1. Menu bar
         self._create_menu_bar()
-
-        # 2. Title bar (decorative, with light theme)
         root.addWidget(self._build_titlebar())
-
-        # 3. Toolbar
         root.addWidget(self._build_toolbar())
 
-        # 4. Main content split (Activity table + Gantt)
         splitter = QSplitter(Qt.Horizontal)
-        splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #c0c0c0;
-                width: 2px;
-            }
-        """)
+        splitter.setStyleSheet(
+            "QSplitter::handle { background-color: #c0c0c0; width: 2px; }"
+        )
 
         self.activity_table = ActivityTable()
         self.activity_table.add_requested.connect(self._on_add_activity)
         self.activity_table.edit_requested.connect(self._on_edit_activity)
         self.activity_table.delete_requested.connect(self._on_delete_activity)
 
+        # Right side: tabbed view
+        self._tabs = QTabWidget()
+        self._tabs.setStyleSheet("""
+            QTabWidget::pane { border: none; background-color: #f8f8f8; }
+            QTabBar::tab {
+                background-color: #e8e8e8; color: #505050;
+                padding: 6px 18px; border: 1px solid #c0c0c0;
+                border-bottom: none; font-size: 11px; font-weight: bold;
+            }
+            QTabBar::tab:selected {
+                background-color: #f8f8f8; color: #1e5c8a;
+                border-bottom: 2px solid #3a7ca5;
+            }
+            QTabBar::tab:hover { background-color: #d8e8f0; }
+        """)
+
         self.gantt_view = GanttView()
+        self.resource_panel = ResourcePanel()
+        self._tabs.addTab(self.gantt_view,     "Gantt Chart")
+        self._tabs.addTab(self.resource_panel, "Resource Loading")
 
         splitter.addWidget(self.activity_table)
-        splitter.addWidget(self.gantt_view)
-        splitter.setSizes([480, 720])
+        splitter.addWidget(self._tabs)
+        splitter.setSizes([500, 940])
         root.addWidget(splitter)
 
-        # 5. Status panel
         self.status_panel = StatusPanel()
         root.addWidget(self.status_panel)
 
+    # ------------------------------------------------------------------
+    # Menu bar
+    # ------------------------------------------------------------------
+
     def _create_menu_bar(self):
-        """Create the main menu bar with File, Edit, and Help menus."""
-        menubar = self.menuBar()
+        mb = self.menuBar()
 
-        # File menu
-        file_menu = menubar.addMenu("&File")
-        new_action = QAction("&New Project", self)
-        new_action.setShortcut(QKeySequence.New)
-        new_action.triggered.connect(self._clear_all)
-        file_menu.addAction(new_action)
+        # File
+        file_menu = mb.addMenu("&File")
 
-        load_sample_action = QAction("&Load Sample Project", self)
-        load_sample_action.triggered.connect(self._load_sample)
-        file_menu.addAction(load_sample_action)
+        act = QAction("&New Project", self)
+        act.setShortcut(QKeySequence.New)
+        act.triggered.connect(self._clear_all)
+        file_menu.addAction(act)
+
+        act = QAction("&Project Settings…", self)
+        act.setShortcut(QKeySequence("Ctrl+,"))
+        act.triggered.connect(self._show_project_settings)
+        file_menu.addAction(act)
 
         file_menu.addSeparator()
 
-        exit_action = QAction("E&xit", self)
-        exit_action.setShortcut(QKeySequence.Quit)
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
+        act = QAction("&Load Sample Project", self)
+        act.triggered.connect(self._load_sample)
+        file_menu.addAction(act)
 
-        # Edit menu
-        edit_menu = menubar.addMenu("&Edit")
-        add_action = QAction("&Add Activity", self)
-        add_action.setShortcut(QKeySequence("Ctrl+A"))
-        add_action.triggered.connect(self._on_add_activity)
-        edit_menu.addAction(add_action)
+        act = QAction("&Import P6 XML…", self)
+        act.setShortcut(QKeySequence("Ctrl+I"))
+        act.triggered.connect(self._import_p6_xml)
+        file_menu.addAction(act)
 
-        schedule_action = QAction("&Schedule", self)
-        schedule_action.setShortcut(QKeySequence("F5"))
-        schedule_action.triggered.connect(self._run_schedule)
-        edit_menu.addAction(schedule_action)
+        file_menu.addSeparator()
 
-        # Help menu
-        help_menu = menubar.addMenu("&Help")
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self._show_about)
-        help_menu.addAction(about_action)
+        act = QAction("E&xit", self)
+        act.setShortcut(QKeySequence.Quit)
+        act.triggered.connect(self.close)
+        file_menu.addAction(act)
+
+        # Edit
+        edit_menu = mb.addMenu("&Edit")
+
+        act = QAction("&Add Activity", self)
+        act.setShortcut(QKeySequence("Ctrl+A"))
+        act.triggered.connect(self._on_add_activity)
+        edit_menu.addAction(act)
+
+        act = QAction("&Schedule  (CPM)", self)
+        act.setShortcut(QKeySequence("F5"))
+        act.triggered.connect(self._run_schedule)
+        edit_menu.addAction(act)
+
+        # Export
+        export_menu = mb.addMenu("&Export")
+
+        act = QAction("Export to &Excel (.xlsx)…", self)
+        act.setShortcut(QKeySequence("Ctrl+E"))
+        act.triggered.connect(self._export_excel)
+        export_menu.addAction(act)
+
+        act = QAction("Export to &PDF…", self)
+        act.setShortcut(QKeySequence("Ctrl+P"))
+        act.triggered.connect(self._export_pdf)
+        export_menu.addAction(act)
+
+        export_menu.addSeparator()
+
+        act = QAction("Export P6 &XML…", self)
+        act.triggered.connect(self._export_p6_xml)
+        export_menu.addAction(act)
+
+        # Help
+        help_menu = mb.addMenu("&Help")
+        act = QAction("&About", self)
+        act.triggered.connect(self._show_about)
+        help_menu.addAction(act)
+
+    # ------------------------------------------------------------------
+    # Title bar & Toolbar
+    # ------------------------------------------------------------------
 
     def _build_titlebar(self) -> QWidget:
-        """Decorative title bar with light theme."""
         bar = QFrame()
-        bar.setStyleSheet("""
-            QFrame {
-                background-color: #e0e0e0;
-                border-bottom: 2px solid #a0a0a0;
-            }
-        """)
+        bar.setStyleSheet(
+            "QFrame { background-color: #e0e0e0; border-bottom: 2px solid #a0a0a0; }"
+        )
         bar.setFixedHeight(46)
         row = QHBoxLayout(bar)
         row.setContentsMargins(16, 0, 16, 0)
 
-        # Logo / title
         logo = QLabel("◈")
         logo.setStyleSheet("color: #2a7ab0; font-size: 20px;")
         row.addWidget(logo)
 
         title = QLabel("Mini-P7")
         title.setStyleSheet(
-            "color: #202020; font-size: 18px; font-weight: bold; letter-spacing: 1px; margin-left: 6px;"
+            "color: #202020; font-size: 18px; font-weight: bold;"
+            " letter-spacing: 1px; margin-left: 6px;"
         )
         row.addWidget(title)
 
-        sub = QLabel("CPM Scheduler")
+        sub = QLabel("CPM Scheduler  ·  Phase 2")
         sub.setStyleSheet(
             "color: #505050; font-size: 12px; margin-left: 4px; margin-top: 4px;"
         )
@@ -199,83 +247,85 @@ class MainWindow(QMainWindow):
 
         row.addStretch()
 
-        help_lbl = QLabel("Double-click a row to edit  •  Drag splitter to resize")
-        help_lbl.setStyleSheet("color: #606060; font-size: 11px;")
-        row.addWidget(help_lbl)
+        self._project_label = QLabel("Project: My Project")
+        self._project_label.setStyleSheet(
+            "color: #1e5c8a; font-size: 11px; font-weight: bold;"
+        )
+        row.addWidget(self._project_label)
+
+        row.addWidget(QLabel("  ·  "))
+
+        self._date_label = QLabel("No start date set")
+        self._date_label.setStyleSheet("color: #606060; font-size: 11px;")
+        row.addWidget(self._date_label)
+
+        row.addWidget(QLabel("  ·  "))
+
+        hint = QLabel("Double-click row to edit  ·  F5 to schedule")
+        hint.setStyleSheet("color: #606060; font-size: 11px;")
+        row.addWidget(hint)
 
         return bar
 
     def _build_toolbar(self) -> QWidget:
-        """Create the toolbar with light‑theme buttons."""
         bar = QFrame()
         bar.setStyleSheet("""
-            QFrame {
-                background-color: #f0f0f0;
-                border-bottom: 1px solid #b0b0b0;
-            }
+            QFrame { background-color: #f0f0f0; border-bottom: 1px solid #b0b0b0; }
             QPushButton {
-                background-color: #ffffff;
-                color: #202020;
-                border: 1px solid #b0b0b0;
-                border-radius: 4px;
-                padding: 6px 18px;
-                font-size: 12px;
-                min-width: 80px;
+                background-color: #ffffff; color: #202020;
+                border: 1px solid #b0b0b0; border-radius: 4px;
+                padding: 6px 14px; font-size: 12px; min-width: 70px;
             }
-            QPushButton:hover {
-                background-color: #e0e0e0;
-            }
+            QPushButton:hover { background-color: #e0e0e0; }
             QPushButton#scheduleBtn {
-                background-color: #2a7ab0;
-                color: #ffffff;
-                border: 1px solid #1e5a8a;
-                font-weight: bold;
-                font-size: 13px;
-                padding: 6px 24px;
+                background-color: #2a7ab0; color: #ffffff;
+                border: 1px solid #1e5a8a; font-weight: bold;
+                font-size: 13px; padding: 6px 22px;
             }
-            QPushButton#scheduleBtn:hover {
-                background-color: #1e6aa0;
-            }
+            QPushButton#scheduleBtn:hover { background-color: #1e6aa0; }
             QPushButton#clearBtn:hover {
-                background-color: #f0d0d0;
-                color: #a00000;
-                border-color: #c06060;
+                background-color: #f0d0d0; color: #a00000; border-color: #c06060;
             }
+            QPushButton#exportBtn {
+                background-color: #f0f8f0; color: #2a7a2a; border: 1px solid #80b080;
+            }
+            QPushButton#exportBtn:hover { background-color: #d8f0d8; }
+            QPushButton#settingsBtn {
+                background-color: #f8f4e8; color: #7a6020; border: 1px solid #c0a840;
+            }
+            QPushButton#settingsBtn:hover { background-color: #f0e8c0; }
         """)
         bar.setFixedHeight(48)
-
         row = QHBoxLayout(bar)
         row.setContentsMargins(12, 6, 12, 6)
-        row.setSpacing(10)
+        row.setSpacing(8)
 
-        # Helper to load icons if available
-        def icon_path(name):
-            return os.path.join(os.path.dirname(__file__), "resources", "icons", name)
+        def btn(label, slot, obj_name=None, tip=None):
+            b = QPushButton(label)
+            if obj_name:
+                b.setObjectName(obj_name)
+            if tip:
+                b.setToolTip(tip)
+            b.clicked.connect(slot)
+            row.addWidget(b)
+            return b
 
-        # Sample data button
-        sample_btn = QPushButton(" Load Sample")
-        if os.path.isfile(icon_path("sample.png")):
-            sample_btn.setIcon(QIcon(icon_path("sample.png")))
-        sample_btn.clicked.connect(self._load_sample)
-        sample_btn.setToolTip("Load the built‑in sample project (replaces current)")
-        row.addWidget(sample_btn)
-
-        # Clear button
-        clear_btn = QPushButton(" Clear All")
-        clear_btn.setObjectName("clearBtn")
-        if os.path.isfile(icon_path("clear.png")):
-            clear_btn.setIcon(QIcon(icon_path("clear.png")))
-        clear_btn.clicked.connect(self._clear_all)
-        clear_btn.setToolTip("Delete all activities")
-        row.addWidget(clear_btn)
+        btn("Load Sample",        self._load_sample,          tip="Load built-in sample project")
+        btn("Clear All",          self._clear_all,  "clearBtn", tip="Delete all activities")
+        btn("Import P6 XML",      self._import_p6_xml,        tip="Import from Primavera P6 XML")
+        btn("Project Settings",   self._show_project_settings, "settingsBtn",
+            tip="Set project name and start date (Ctrl+,)")
 
         row.addStretch()
 
-        # Schedule button (hero action)
+        btn("Excel",  self._export_excel,   "exportBtn", tip="Export to Excel (Ctrl+E)")
+        btn("PDF",    self._export_pdf,     "exportBtn", tip="Export to PDF (Ctrl+P)")
+        btn("P6 XML", self._export_p6_xml,  "exportBtn", tip="Export to Primavera P6 XML")
+
+        row.addSpacing(12)
+
         schedule_btn = QPushButton(" ▶  Schedule")
         schedule_btn.setObjectName("scheduleBtn")
-        if os.path.isfile(icon_path("schedule.png")):
-            schedule_btn.setIcon(QIcon(icon_path("schedule.png")))
         schedule_btn.setToolTip("Run CPM forward/backward pass (F5)")
         schedule_btn.clicked.connect(self._run_schedule)
         row.addWidget(schedule_btn)
@@ -285,6 +335,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Data loading / saving
     # ------------------------------------------------------------------
+
     def _load_from_db(self):
         self._activities = load_all_activities()
         self._refresh_ui()
@@ -296,28 +347,50 @@ class MainWindow(QMainWindow):
     def _refresh_ui(self):
         self.activity_table.populate(self._activities)
         self.gantt_view.render_gantt(self._activities)
+        self.resource_panel.render_resources(self._activities)
+        self._project_label.setText(f"Project: {self._project_name}")
+        self._date_label.setText(
+            self._start_date.strftime("Start: %d %b %Y")
+            if self._start_date else "No start date set"
+        )
 
     # ------------------------------------------------------------------
-    # Menu / toolbar actions
+    # Actions
     # ------------------------------------------------------------------
+
+    def _show_project_settings(self):
+        dlg = ProjectSettingsDialog(
+            parent=self,
+            project_name=self._project_name,
+            start_date=self._start_date,
+            calendar_type=self._calendar_type,
+        )
+        if dlg.exec():
+            self._project_name  = dlg.project_name
+            self._start_date    = dlg.start_date
+            self._calendar_type = dlg.calendar_type
+            self._refresh_ui()
+            self.status_panel.set_message(
+                f"Project settings saved.  "
+                f"Start: {self._start_date.strftime('%d %b %Y')}"
+            )
+
     def _load_sample(self):
         reply = QMessageBox.question(
-            self,
-            "Load Sample",
+            self, "Load Sample",
             "This will replace the current project with sample data.\nContinue?",
             QMessageBox.Yes | QMessageBox.No,
         )
         if reply != QMessageBox.Yes:
             return
 
-        # Clear DB
         for act_id in list(self._activities.keys()):
             delete_activity(act_id)
         self._activities.clear()
 
-        # Insert sample
         for act in SAMPLE_ACTIVITIES:
-            a = Activity(act.id, act.name, act.duration, list(act.predecessors))
+            a = Activity(act.id, act.name, act.duration, act.predecessors,
+                         resource=act.resource)
             self._activities[a.id] = a
             save_activity(a)
 
@@ -330,9 +403,7 @@ class MainWindow(QMainWindow):
         if not self._activities:
             return
         reply = QMessageBox.question(
-            self,
-            "Clear All",
-            "Delete all activities? This cannot be undone.",
+            self, "Clear All", "Delete all activities? This cannot be undone.",
             QMessageBox.Yes | QMessageBox.No,
         )
         if reply != QMessageBox.Yes:
@@ -347,11 +418,9 @@ class MainWindow(QMainWindow):
         if not self._activities:
             self.status_panel.set_message("No activities to schedule.", error=True)
             return
-
         try:
             scheduler = CPMScheduler(self._activities)
             scheduler.schedule()
-            # Results are written back into the same Activity objects
             save_all_activities(self._activities)
             critical = scheduler.get_critical_path()
             self._refresh_ui()
@@ -360,21 +429,119 @@ class MainWindow(QMainWindow):
             self.status_panel.set_message(str(e), error=True)
             QMessageBox.critical(self, "Scheduling Error", str(e))
 
-    def _show_about(self):
-        from main import APP_NAME, APP_VERSION, ORGANIZATION_URL
+    # ---- Export ----
 
-        QMessageBox.about(
-            self,
-            f"About {APP_NAME}",
-            f"<b>{APP_NAME}</b> version {APP_VERSION}<br>"
-            f"A modern CPM scheduling tool.<br>"
-            f"<a href='{ORGANIZATION_URL}'>{ORGANIZATION_URL}</a><br><br>"
-            "Built with PySide6.",
+    def _export_excel(self):
+        if not self._activities:
+            QMessageBox.information(self, "Export", "No activities to export.")
+            return
+        filepath, _ = QFileDialog.getSaveFileName(
+            self, "Export to Excel", f"{self._project_name}.xlsx",
+            "Excel Workbook (*.xlsx)"
         )
+        if not filepath:
+            return
+        try:
+            from export_manager import export_to_excel
+            export_to_excel(self._activities, filepath,
+                            project_name=self._project_name,
+                            start_date=self._start_date)
+            self.status_panel.set_message(
+                f"Exported to Excel: {os.path.basename(filepath)}"
+            )
+            QMessageBox.information(self, "Export Complete",
+                                    f"Schedule exported to:\n{filepath}")
+        except ImportError as e:
+            QMessageBox.critical(self, "Missing Dependency",
+                                 f"{e}\n\nRun:  pip install openpyxl")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", str(e))
 
-    # ------------------------------------------------------------------
-    # Activity CRUD (from table signals)
-    # ------------------------------------------------------------------
+    def _export_pdf(self):
+        if not self._activities:
+            QMessageBox.information(self, "Export", "No activities to export.")
+            return
+        filepath, _ = QFileDialog.getSaveFileName(
+            self, "Export to PDF", f"{self._project_name}.pdf",
+            "PDF Document (*.pdf)"
+        )
+        if not filepath:
+            return
+        try:
+            from export_manager import export_to_pdf
+            export_to_pdf(self._activities, filepath,
+                          project_name=self._project_name,
+                          start_date=self._start_date)
+            self.status_panel.set_message(
+                f"Exported to PDF: {os.path.basename(filepath)}"
+            )
+            QMessageBox.information(self, "Export Complete",
+                                    f"Schedule exported to:\n{filepath}")
+        except ImportError as e:
+            QMessageBox.critical(self, "Missing Dependency",
+                                 f"{e}\n\nRun:  pip install reportlab")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", str(e))
+
+    def _export_p6_xml(self):
+        if not self._activities:
+            QMessageBox.information(self, "Export", "No activities to export.")
+            return
+        filepath, _ = QFileDialog.getSaveFileName(
+            self, "Export P6 XML", f"{self._project_name}.xml",
+            "P6 XML File (*.xml)"
+        )
+        if not filepath:
+            return
+        try:
+            from p6_xml import export_p6_xml
+            export_p6_xml(self._activities, filepath,
+                          project_name=self._project_name,
+                          start_date=self._start_date)
+            self.status_panel.set_message(
+                f"Exported P6 XML: {os.path.basename(filepath)}"
+            )
+            QMessageBox.information(self, "Export Complete",
+                                    f"P6 XML exported to:\n{filepath}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", str(e))
+
+    def _import_p6_xml(self):
+        filepath, _ = QFileDialog.getOpenFileName(
+            self, "Import P6 XML", "", "P6 XML Files (*.xml);;All Files (*)"
+        )
+        if not filepath:
+            return
+        reply = QMessageBox.question(
+            self, "Import P6 XML",
+            "This will replace all current activities.\nContinue?",
+            QMessageBox.Yes | QMessageBox.No,
+        )
+        if reply != QMessageBox.Yes:
+            return
+        try:
+            from p6_xml import import_p6_xml
+            imported = import_p6_xml(filepath)
+            if not imported:
+                QMessageBox.warning(self, "Import",
+                                    "No activities found in the XML file.")
+                return
+            for act_id in list(self._activities.keys()):
+                delete_activity(act_id)
+            self._activities.clear()
+            for act in imported.values():
+                self._activities[act.id] = act
+                save_activity(act)
+            self._refresh_ui()
+            self.status_panel.set_message(
+                f"Imported {len(imported)} activit(ies) from "
+                f"{os.path.basename(filepath)}. Click ▶ Schedule to compute CPM."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", str(e))
+
+    # ---- CRUD ----
+
     def _on_add_activity(self):
         dlg = ActivityDialog(parent=self, existing_ids=list(self._activities.keys()))
         if dlg.exec():
@@ -405,9 +572,7 @@ class MainWindow(QMainWindow):
 
     def _on_delete_activity(self, act_id: str):
         reply = QMessageBox.question(
-            self,
-            "Delete Activity",
-            f"Delete activity '{act_id}'?",
+            self, "Delete Activity", f"Delete activity '{act_id}'?",
             QMessageBox.Yes | QMessageBox.No,
         )
         if reply != QMessageBox.Yes:
@@ -419,10 +584,26 @@ class MainWindow(QMainWindow):
             f"Activity '{act_id}' deleted. Click ▶ Schedule to update CPM."
         )
 
-    # ------------------------------------------------------------------
-    # Event overrides
-    # ------------------------------------------------------------------
+    def _show_about(self):
+        QMessageBox.about(
+            self, "About Mini-P7",
+            "<b>Mini-P7</b> v2.0.0 — CPM Scheduler<br><br>"
+            "<b>Phase 2 features added:</b><br>"
+            "&nbsp;&nbsp;• Project Settings (name + start date)<br>"
+            "&nbsp;&nbsp;• Export to Excel (.xlsx)<br>"
+            "&nbsp;&nbsp;• Export to PDF (reportlab)<br>"
+            "&nbsp;&nbsp;• Import / Export Primavera P6 XML<br>"
+            "&nbsp;&nbsp;• Resource Loading chart<br>"
+            "&nbsp;&nbsp;• Free Float (FF) column<br>"
+            "&nbsp;&nbsp;• Resource column in activity table<br><br>"
+            "<b>Phase 1 bugs fixed:</b><br>"
+            "&nbsp;&nbsp;• Raw SQL / wrong table name in db.py<br>"
+            "&nbsp;&nbsp;• Missing resource, description, free_float fields<br>"
+            "&nbsp;&nbsp;• Free float never computed in scheduler<br>"
+            "&nbsp;&nbsp;• Predecessors isinstance(tuple) check<br><br>"
+            "Built with PySide6.",
+        )
+
     def closeEvent(self, event):
-        """Save window geometry when closing."""
         self._settings.setValue("geometry", self.saveGeometry())
         super().closeEvent(event)

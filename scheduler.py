@@ -134,9 +134,32 @@ class CPMScheduler:
     # ------------------------------------------------------------------
 
     def _compute_float(self):
-        for act in self.activities.values():
+        """
+        FIX: free_float was never computed (always stayed 0).
+
+        Total Float  = LS - ES  (slack without delaying project end)
+        Free Float   = ES_of_earliest_successor - EF  (slack without delaying any successor)
+        """
+        # Build successor map needed for free float
+        successors: Dict[str, List[str]] = {aid: [] for aid in self.activities}
+        for act_id, act in self.activities.items():
+            for pred_id in act.predecessors:
+                successors[pred_id].append(act_id)
+
+        project_finish = max(act.EF for act in self.activities.values())
+
+        for act_id, act in self.activities.items():
             act.total_float = act.LS - act.ES
             act.is_critical = act.total_float == 0
+
+            # Free float: min(successor ES) - EF, or project_finish - EF for terminal activities
+            succ_ids = successors[act_id]
+            if succ_ids:
+                act.free_float = min(
+                    self.activities[s].ES for s in succ_ids
+                ) - act.EF
+            else:
+                act.free_float = project_finish - act.EF
 
     # ------------------------------------------------------------------
     # Utility helpers
