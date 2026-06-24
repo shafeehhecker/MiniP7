@@ -95,3 +95,29 @@ def test_cycle_rejected(svc, owner):
     svc.add_activity(org, owner.id, proj, Activity(id="Y", name="Y", duration=1, predecessors=["X"]))
     with pytest.raises(ServiceError):
         svc.schedule(org, owner.id, proj)
+
+
+# ---- authentication (Milestone 1) ----
+def test_register_and_authenticate():
+    from persistence import InMemoryRepository
+    s = ProjectService(InMemoryRepository(), token_secret="t")
+    r = s.register_user("founder@acme.com", "hunter2pass", organization_name="Acme")
+    assert r["organization_id"]
+    log = s.authenticate("founder@acme.com", "hunter2pass")
+    assert log["user_id"] == r["user_id"]
+
+
+def test_duplicate_email_rejected():
+    from persistence import InMemoryRepository
+    s = ProjectService(InMemoryRepository(), token_secret="t")
+    s.register_user("dup@acme.com", "password1")
+    with pytest.raises(ServiceError):
+        s.register_user("dup@acme.com", "password2")
+
+
+def test_wrong_password_rejected():
+    from persistence import InMemoryRepository
+    s = ProjectService(InMemoryRepository(), token_secret="t")
+    s.register_user("a@acme.com", "rightpass1")
+    with pytest.raises(ServiceError):
+        s.authenticate("a@acme.com", "wrongpass1")

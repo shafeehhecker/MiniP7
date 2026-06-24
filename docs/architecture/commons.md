@@ -12,6 +12,7 @@ phase and must obey the [dependency rule](ARCHITECTURE.md#the-dependency-rule).
 |---|---|---|---|---|---|
 | [`schema`](../../packages/schema/README.md) | 1 | Python → TS | experimental | — | Canonical domain model; the single source of truth |
 | [`engine`](../../packages/engine/README.md) | 2 | Python | **built** | `schema` | Pure CPM + EVM computation, no I/O |
+| [`auth`](../../packages/auth/README.md) | M1 | Python | **built** | — | Password hashing + JWT (self-hosted) |
 | `persistence` | 3 | Python | **built** | `schema` | Storage-agnostic repositories |
 | `services` | 3 | Python | **built** | `engine`, `persistence` | Orchestration / use-cases |
 | `client` | 4 | TypeScript | planned | `schema` | Generated, typed API client |

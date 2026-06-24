@@ -9,7 +9,7 @@ from __future__ import annotations
 import sqlite3
 from typing import List, Optional
 
-from schema import Organization, Project
+from schema import Organization, Project, User
 
 
 class SQLiteRepository:
@@ -19,8 +19,33 @@ class SQLiteRepository:
             "CREATE TABLE IF NOT EXISTS organizations (id TEXT PRIMARY KEY, data TEXT NOT NULL)"
         )
         self._conn.execute(
+            "CREATE TABLE IF NOT EXISTS users ("
+            "id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, data TEXT NOT NULL)"
+        )
+        self._conn.execute(
             "CREATE TABLE IF NOT EXISTS projects ("
             "id TEXT PRIMARY KEY, organization_id TEXT NOT NULL, data TEXT NOT NULL)"
+        )
+        self._conn.commit()
+
+    # ---- users ----
+    def get_user(self, user_id: str) -> Optional[User]:
+        row = self._conn.execute(
+            "SELECT data FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        return User.model_validate_json(row[0]) if row else None
+
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        row = self._conn.execute(
+            "SELECT data FROM users WHERE email = ?", (email.strip().lower(),)
+        ).fetchone()
+        return User.model_validate_json(row[0]) if row else None
+
+    def save_user(self, user: User) -> None:
+        self._conn.execute(
+            "INSERT INTO users (id, email, data) VALUES (?, ?, ?) "
+            "ON CONFLICT(id) DO UPDATE SET email = excluded.email, data = excluded.data",
+            (user.id, user.email, user.model_dump_json()),
         )
         self._conn.commit()
 

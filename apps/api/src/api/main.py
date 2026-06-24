@@ -1,35 +1,48 @@
-"""FastAPI server (Phase 4, multi-tenant).
+"""FastAPI server (Milestone 1 — real authentication).
 
-Thin transport layer over ProjectService. All business logic and tenancy
-enforcement live in the service below it.
-
-AUTH NOTE: real authentication (Milestone 1 / ADR-0006) is not wired yet. For now
-the caller identifies themselves with two headers — X-User-Id and X-Org-Id — which
-a future auth layer will replace by deriving both from a verified token. The
-service already enforces membership and roles, so the security model is in place;
-only the identity *source* is temporary.
+Thin transport layer over ProjectService. Identity now comes from a verified JWT
+(self-hosted auth, ADR-0006), not a header: clients sign up / log in to get a
+token, then send it as `Authorization: Bearer <token>`. The `current_user`
+dependency validates the token and yields the user id, which the service uses to
+enforce membership and roles.
 """
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import FileResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 
-from schema import Activity, Project, Organization, User, Role
+from schema import (
+    Activity, Project, Organization, Role,
+    SignupRequest, LoginRequest, AuthResponse,
+)
 from persistence import SQLiteRepository
 from services import ProjectService, ServiceError, PermissionError_
+from auth import decode_access_token, TokenError
 
 DB_PATH = os.environ.get("MINIP7_DB", "minip7.db")
-service = ProjectService(SQLiteRepository(DB_PATH))
+SECRET = os.environ.get("MINIP7_SECRET", "dev-insecure-secret-change-me")
+service = ProjectService(SQLiteRepository(DB_PATH), token_secret=SECRET)
 
 app = FastAPI(
     title="Mini-P7 API",
-    version="0.2.0",
-    description="Multi-tenant CPM scheduler — organizations, projects, scheduling.",
+    version="0.3.0",
+    description="Multi-tenant CPM scheduler with self-hosted authentication.",
 )
+
+_bearer = HTTPBearer(auto_error=True)
+
+
+def current_user(creds: HTTPAuthorizationCredentials = Depends(_bearer)) -> str:
+    """Validate the bearer token and return the user id, else 401."""
+    try:
+        return decode_access_token(creds.credentials, SECRET)
+    except TokenError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 
 def _guard(fn):
@@ -41,59 +54,72 @@ def _guard(fn):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# ---- organizations ----
-@app.post("/api/organizations", response_model=Organization, tags=["orgs"])
-def create_org(id: str, name: str, user_id: str = Header(..., alias="X-User-Id"),
-               email: str = Header("user@example.com", alias="X-User-Email")):
-    owner = User(id=user_id, email=email)
-    return _guard(lambda: service.create_organization(id, name, owner))
+# ---- auth (public) ----
+@app.post("/api/auth/signup", response_model=AuthResponse, tags=["auth"])
+def signup(body: SignupRequest):
+    return _guard(lambda: service.register_user(
+        body.email, body.password, body.name, body.organization_name))
+
+
+@app.post("/api/auth/login", response_model=AuthResponse, tags=["auth"])
+def login(body: LoginRequest):
+    return _guard(lambda: service.authenticate(body.email, body.password))
+
+
+# ---- organizations (authenticated) ----
+@app.get("/api/organizations", response_model=list[Organization], tags=["orgs"])
+def my_organizations(uid: str = Depends(current_user)):
+    return _guard(lambda: service.list_my_organizations(uid))
 
 
 @app.post("/api/organizations/{org_id}/members", response_model=Organization, tags=["orgs"])
 def add_member(org_id: str, user_id: str, role: Role = Role.MEMBER,
-               actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.add_member(org_id, actor_id, user_id, role))
+               uid: str = Depends(current_user)):
+    return _guard(lambda: service.add_member(org_id, uid, user_id, role))
 
 
-# ---- projects (org-scoped) ----
+# ---- projects (authenticated + org-scoped) ----
 @app.get("/api/organizations/{org_id}/projects", response_model=list[Project], tags=["projects"])
-def list_projects(org_id: str, actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.list_projects(org_id, actor_id))
+def list_projects(org_id: str, uid: str = Depends(current_user)):
+    return _guard(lambda: service.list_projects(org_id, uid))
 
 
 @app.post("/api/organizations/{org_id}/projects", response_model=Project, tags=["projects"])
 def create_project(org_id: str, id: str, name: str = "My Project",
-                   actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.create_project(org_id, actor_id, id, name))
+                   uid: str = Depends(current_user)):
+    return _guard(lambda: service.create_project(org_id, uid, id, name))
 
 
 @app.get("/api/organizations/{org_id}/projects/{project_id}", response_model=Project, tags=["projects"])
-def get_project(org_id: str, project_id: str, actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.get_project(org_id, actor_id, project_id))
+def get_project(org_id: str, project_id: str, uid: str = Depends(current_user)):
+    return _guard(lambda: service.get_project(org_id, uid, project_id))
 
 
 @app.post("/api/organizations/{org_id}/projects/{project_id}/sample",
           response_model=Project, tags=["projects"])
-def load_sample(org_id: str, project_id: str, actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.load_sample(org_id, actor_id, project_id))
+def load_sample(org_id: str, project_id: str, uid: str = Depends(current_user)):
+    return _guard(lambda: service.load_sample(org_id, uid, project_id))
 
 
 @app.post("/api/organizations/{org_id}/projects/{project_id}/activities",
           response_model=Project, tags=["activities"])
 def add_activity(org_id: str, project_id: str, activity: Activity,
-                 actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.add_activity(org_id, actor_id, project_id, activity))
+                 uid: str = Depends(current_user)):
+    return _guard(lambda: service.add_activity(org_id, uid, project_id, activity))
 
 
 @app.post("/api/organizations/{org_id}/projects/{project_id}/schedule", tags=["scheduling"])
-def schedule(org_id: str, project_id: str, actor_id: str = Header(..., alias="X-User-Id")):
-    return _guard(lambda: service.schedule(org_id, actor_id, project_id))
+def schedule(org_id: str, project_id: str, uid: str = Depends(current_user)):
+    return _guard(lambda: service.schedule(org_id, uid, project_id))
 
 
-# ---- serve the zero-build UI ----
+# ---- serve the UI ----
 _static = Path(__file__).resolve().parents[2] / "static"
 if _static.exists():
     @app.get("/", include_in_schema=False)
     def index():
         return FileResponse(_static / "index.html")
-    app.mount("/", StaticFiles(directory=_static), name="static")
+    @app.get("/login", include_in_schema=False)
+    def login_page():
+        return FileResponse(_static / "login.html")
+    app.mount("/static", StaticFiles(directory=_static), name="static")

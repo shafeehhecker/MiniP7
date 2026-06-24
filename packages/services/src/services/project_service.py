@@ -8,12 +8,14 @@ API or UI (the dependency rule).
 """
 from __future__ import annotations
 
+import uuid
 from typing import List
 
 from schema import (
     Activity, Project, Organization, User, Membership, Role,
 )
 from engine import CPMScheduler, SchedulerError
+from auth import hash_password, verify_password, create_access_token
 
 __all__ = ["ProjectService", "ServiceError", "PermissionError_"]
 
@@ -31,9 +33,52 @@ _WRITE_ROLES = {Role.OWNER, Role.ADMIN, Role.MEMBER}
 
 
 class ProjectService:
-    def __init__(self, repo) -> None:
-        # repo implements both OrganizationRepository and ProjectRepository
+    def __init__(self, repo, token_secret: str = "dev-insecure-secret") -> None:
+        # repo implements the org, user, and project repository protocols
         self._repo = repo
+        self._secret = token_secret
+
+    # ------------------------------------------------------------------
+    # Authentication (Milestone 1)
+    # ------------------------------------------------------------------
+    def register_user(self, email: str, password: str, name: str | None = None,
+                      organization_name: str = "My Organization") -> dict:
+        """Create a user (with hashed password) and their first organization,
+        making them its owner. Returns an access token."""
+        if self._repo.get_user_by_email(email.strip().lower()):
+            raise ServiceError("An account with that email already exists.")
+        user = User(
+            id=f"user_{uuid.uuid4().hex[:12]}",
+            email=email,
+            name=name,
+            password_hash=hash_password(password),
+        )
+        self._repo.save_user(user)
+        org = Organization(
+            id=f"org_{uuid.uuid4().hex[:12]}",
+            name=organization_name,
+            memberships=[Membership(user_id=user.id, organization_id="",
+                                    role=Role.OWNER)],
+        )
+        # fix the membership org id now that we have it
+        org.memberships[0].organization_id = org.id
+        self._repo.save_org(org)
+        token = create_access_token(user.id, self._secret)
+        return {"access_token": token, "token_type": "bearer",
+                "user_id": user.id, "email": user.email,
+                "organization_id": org.id}
+
+    def authenticate(self, email: str, password: str) -> dict:
+        """Verify credentials and return an access token, else raise."""
+        user = self._repo.get_user_by_email(email.strip().lower())
+        if not user or not user.password_hash or not verify_password(password, user.password_hash):
+            raise ServiceError("Invalid email or password.")
+        token = create_access_token(user.id, self._secret)
+        orgs = self._repo.list_orgs_for_user(user.id)
+        org_id = orgs[0].id if orgs else None
+        return {"access_token": token, "token_type": "bearer",
+                "user_id": user.id, "email": user.email,
+                "organization_id": org_id}
 
     # ------------------------------------------------------------------
     # Organizations & membership

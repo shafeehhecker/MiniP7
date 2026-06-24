@@ -59,8 +59,10 @@
   <h1>Mini-P7</h1>
   <span class="sub" id="proj-name">— no project —</span>
   <div class="bar">
+    <span class="sub" id="user-email" style="margin-right:4px"></span>
     <button onclick="loadSample()">Load sample</button>
     <button class="primary" onclick="runSchedule()">▶ Schedule</button>
+    <button onclick="logout()">Sign out</button>
   </div>
 </header>
 
@@ -85,11 +87,12 @@
 </main>
 
 <script>
-// Temporary identity until real auth lands (Milestone 1). The API reads these
-// from headers; a future login replaces them with a verified token.
-const USER_ID = "demo-user";
-const USER_EMAIL = "demo@acme.com";
-const ORG = "demo-org";
+// Require a session; bounce to login if there isn't one.
+const TOKEN = sessionStorage.getItem("minip7_token");
+const ORG = sessionStorage.getItem("minip7_org");
+const EMAIL = sessionStorage.getItem("minip7_email") || "";
+if (!TOKEN || !ORG) { window.location.href = "/login"; }
+
 const PROJECT = "demo";
 let lastData = null;
 
@@ -98,12 +101,16 @@ async function api(method, path, body) {
     method,
     headers: {
       "Content-Type": "application/json",
-      "X-User-Id": USER_ID,
-      "X-User-Email": USER_EMAIL,
+      "Authorization": "Bearer " + TOKEN,
     },
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(path, opts);
+  if (res.status === 401) {            // token expired/invalid -> re-login
+    sessionStorage.clear();
+    window.location.href = "/login";
+    throw new Error("Session expired.");
+  }
   if (!res.ok) {
     const detail = (await res.json().catch(() => ({}))).detail || res.statusText;
     throw new Error(detail);
@@ -115,23 +122,24 @@ function showErr(msg) {
   e.textContent = msg; e.style.display = "block";
   setTimeout(() => (e.style.display = "none"), 4000);
 }
-async function ensureOrgAndProject() {
-  // create org (ignore "already exists"), then project (ignore "already exists")
-  try { await api("POST", `/api/organizations?id=${ORG}&name=Acme+Inc`); } catch (e) {}
+function logout() { sessionStorage.clear(); window.location.href = "/login"; }
+
+async function ensureProject() {
+  // create the demo project in *this user's* org; ignore "already exists"
   try {
     await api("POST", `/api/organizations/${ORG}/projects?id=${PROJECT}&name=Harbor+View+Office+Complex`);
   } catch (e) {}
 }
 async function loadSample() {
   try {
-    await ensureOrgAndProject();
+    await ensureProject();
     await api("POST", `/api/organizations/${ORG}/projects/${PROJECT}/sample`);
     await runSchedule();
   } catch (e) { showErr(e.message); }
 }
 async function runSchedule() {
   try {
-    await ensureOrgAndProject();
+    await ensureProject();
     const data = await api("POST", `/api/organizations/${ORG}/projects/${PROJECT}/schedule`);
     lastData = data;
     render(data);
@@ -171,6 +179,7 @@ function render(data) {
   document.getElementById("gantt").innerHTML = g;
 }
 loadSample();
+document.getElementById("user-email").textContent = EMAIL;
 </script>
 </body>
 </html>

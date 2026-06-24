@@ -113,14 +113,15 @@ class Role(str, Enum):
 
 
 class User(BaseModel):
-    """A person. Identity only — no org-specific data lives here.
+    """A person. Identity plus a hashed password.
 
-    Authentication (passwords, tokens) is handled by the auth layer, not stored
-    on this model. A user may belong to several organizations via memberships.
+    The password is stored only as a bcrypt hash (never plaintext), produced by
+    the auth commons. A user may belong to several organizations via memberships.
     """
     id: str
     email: str
     name: str | None = None
+    password_hash: str | None = None  # set at registration; never the plaintext
 
     @field_validator("email")
     @classmethod
@@ -129,6 +130,28 @@ class User(BaseModel):
         if "@" not in v or "." not in v.split("@")[-1]:
             raise ValueError("Invalid email address.")
         return v
+
+
+class SignupRequest(BaseModel):
+    """Payload to register a new user (and their first organization)."""
+    email: str
+    password: str = Field(min_length=8, description="At least 8 characters.")
+    name: str | None = None
+    organization_name: str = "My Organization"
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    """Returned on successful signup or login."""
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str
+    email: str
+    organization_id: str | None = None
 
 
 class Membership(BaseModel):
