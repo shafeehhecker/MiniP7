@@ -39,6 +39,14 @@ done, and a reusability contract — what downstream gets for free.
 - **Done when:** a new view is assembled from primitives with zero raw styling.
 - **Reuse:** every feature vertical is composition, not construction.
 
+## Built since: core-job web UI
+
+A zero-build web app (served by the API) now provides the core job end to end:
+sign up / log in, a projects list, create projects, add / edit / delete tasks
+through a form, run the schedule, and an interactive Gantt with dependency
+arrows. A React migration remains an option if the component ecosystem is
+needed later; the zero-build approach avoids a Node toolchain for now.
+
 ## Phases 6+ — Feature verticals
 Schedule/Gantt, Resources & loading, Costs & EVM, Dashboard/Portfolio, then
 Risks/Issues/Docs. These consume all the commons. When a vertical finds shared

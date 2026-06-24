@@ -146,6 +146,31 @@ class ProjectService:
         self._repo.save(project)
         return project
 
+    def update_activity(self, org_id: str, actor_id: str,
+                        project_id: str, activity: Activity) -> Project:
+        org = self._get_org(org_id)
+        self._require_role(org, actor_id, _WRITE_ROLES)
+        project = self.get_project(org_id, actor_id, project_id)
+        idx = next((i for i, a in enumerate(project.activities)
+                    if a.id == activity.id), None)
+        if idx is None:
+            raise ServiceError(f"No activity '{activity.id}' to update.")
+        project.activities[idx] = activity
+        self._repo.save(project)
+        return project
+
+    def delete_activity(self, org_id: str, actor_id: str,
+                        project_id: str, activity_id: str) -> Project:
+        org = self._get_org(org_id)
+        self._require_role(org, actor_id, _WRITE_ROLES)
+        project = self.get_project(org_id, actor_id, project_id)
+        before = len(project.activities)
+        project.activities = [a for a in project.activities if a.id != activity_id]
+        if len(project.activities) == before:
+            raise ServiceError(f"No activity '{activity_id}' to delete.")
+        self._repo.save(project)
+        return project
+
     def schedule(self, org_id: str, actor_id: str, project_id: str) -> dict:
         project = self.get_project(org_id, actor_id, project_id)
         if not project.activities:

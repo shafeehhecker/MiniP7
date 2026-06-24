@@ -121,3 +121,23 @@ def test_wrong_password_rejected():
     s.register_user("a@acme.com", "rightpass1")
     with pytest.raises(ServiceError):
         s.authenticate("a@acme.com", "wrongpass1")
+
+
+def test_update_and_delete_activity():
+    from persistence import InMemoryRepository
+    from schema import User, Activity
+    s = ProjectService(InMemoryRepository(), token_secret="t")
+    owner = User(id="u1", email="o@acme.com")
+    s.create_organization("acme", "Acme", owner)
+    s.create_project("acme", "u1", "p1")
+    s.add_activity("acme", "u1", "p1", Activity(id="A", name="Start", duration=2))
+    # update
+    s.update_activity("acme", "u1", "p1", Activity(id="A", name="Start v2", duration=5))
+    p = s.get_project("acme", "u1", "p1")
+    assert p.activities[0].name == "Start v2" and p.activities[0].duration == 5
+    # delete
+    s.delete_activity("acme", "u1", "p1", "A")
+    assert len(s.get_project("acme", "u1", "p1").activities) == 0
+    # delete missing
+    with pytest.raises(ServiceError):
+        s.delete_activity("acme", "u1", "p1", "ghost")

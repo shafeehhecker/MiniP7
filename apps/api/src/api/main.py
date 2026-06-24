@@ -108,6 +108,20 @@ def add_activity(org_id: str, project_id: str, activity: Activity,
     return _guard(lambda: service.add_activity(org_id, uid, project_id, activity))
 
 
+@app.put("/api/organizations/{org_id}/projects/{project_id}/activities/{activity_id}",
+         response_model=Project, tags=["activities"])
+def update_activity(org_id: str, project_id: str, activity_id: str, activity: Activity,
+                    uid: str = Depends(current_user)):
+    return _guard(lambda: service.update_activity(org_id, uid, project_id, activity))
+
+
+@app.delete("/api/organizations/{org_id}/projects/{project_id}/activities/{activity_id}",
+            response_model=Project, tags=["activities"])
+def delete_activity(org_id: str, project_id: str, activity_id: str,
+                    uid: str = Depends(current_user)):
+    return _guard(lambda: service.delete_activity(org_id, uid, project_id, activity_id))
+
+
 @app.post("/api/organizations/{org_id}/projects/{project_id}/schedule", tags=["scheduling"])
 def schedule(org_id: str, project_id: str, uid: str = Depends(current_user)):
     return _guard(lambda: service.schedule(org_id, uid, project_id))

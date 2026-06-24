@@ -6,180 +6,245 @@
 <title>Mini-P7</title>
 <style>
   :root {
-    --bg: #f7f7f4; --panel: #ffffff; --ink: #1f1f1d; --muted: #6b6a64;
-    --line: #e4e3dd; --accent: #185fa5; --accent-soft: #e6f1fb;
-    --crit: #c0392b; --crit-soft: #fcebeb; --ok: #1d9e75;
+    --bg:#f6f6f3; --panel:#fff; --ink:#1f1f1d; --muted:#6f6e68; --line:#e6e5df;
+    --accent:#185fa5; --accent-soft:#e8f1fb; --crit:#c0392b; --crit-soft:#fbe9e9;
+    --ok:#1d9e75; --shadow:0 1px 3px rgba(0,0,0,.05);
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-         background: var(--bg); color: var(--ink); }
-  header { background: var(--panel); border-bottom: 1px solid var(--line);
-           padding: 14px 22px; display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 18px; font-weight: 600; margin: 0; }
-  header .sub { color: var(--muted); font-size: 13px; }
-  .bar { margin-left: auto; display: flex; gap: 8px; }
-  button { font: inherit; font-size: 13px; border: 1px solid var(--line);
-           background: var(--panel); color: var(--ink); padding: 7px 13px;
-           border-radius: 8px; cursor: pointer; }
-  button:hover { border-color: var(--accent); color: var(--accent); }
-  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  button.primary:hover { color: #fff; opacity: .92; }
-  main { padding: 22px; max-width: 1100px; margin: 0 auto; }
-  .kpis { display: flex; gap: 14px; margin-bottom: 18px; }
-  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-         padding: 14px 18px; min-width: 150px; }
-  .kpi .label { color: var(--muted); font-size: 12px; }
-  .kpi .value { font-size: 24px; font-weight: 600; margin-top: 4px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-          padding: 0; margin-bottom: 18px; overflow: hidden; }
-  .card h2 { font-size: 14px; margin: 0; padding: 13px 18px; border-bottom: 1px solid var(--line);
-             font-weight: 600; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); }
-  th { color: var(--muted); font-weight: 500; background: #fafaf8; }
-  tr.crit td { background: var(--crit-soft); }
-  tr.crit td:first-child { font-weight: 600; color: var(--crit); }
-  .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 11px; }
-  .pill.crit { background: var(--crit); color: #fff; }
-  .pill.float { background: var(--accent-soft); color: var(--accent); }
-  .gantt { padding: 14px 18px; overflow-x: auto; }
-  .row { display: flex; align-items: center; height: 30px; }
-  .row .name { width: 130px; font-size: 13px; flex-shrink: 0; }
-  .track { position: relative; flex: 1; height: 18px; }
-  .baar { position: absolute; height: 18px; border-radius: 4px; }
-  .baar.crit { background: var(--crit); }
-  .baar.norm { background: var(--accent); }
-  .empty { padding: 40px; text-align: center; color: var(--muted); }
-  .err { background: var(--crit-soft); color: var(--crit); padding: 10px 14px;
-         border-radius: 8px; margin-bottom: 14px; display: none; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+         background:var(--bg); color:var(--ink); font-size:14px; }
+  header { background:var(--panel); border-bottom:1px solid var(--line); padding:12px 22px;
+           display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:10; }
+  header h1 { font-size:17px; margin:0; font-weight:600; cursor:pointer; }
+  .crumb { color:var(--muted); font-size:13px; }
+  .spacer { margin-left:auto; }
+  .email { color:var(--muted); font-size:13px; margin-right:6px; }
+  button { font:inherit; font-size:13px; border:1px solid var(--line); background:var(--panel);
+           color:var(--ink); padding:7px 13px; border-radius:8px; cursor:pointer; }
+  button:hover { border-color:var(--accent); color:var(--accent); }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.primary:hover { color:#fff; opacity:.92; }
+  button.danger:hover { border-color:var(--crit); color:var(--crit); }
+  main { padding:22px; max-width:1080px; margin:0 auto; }
+  .kpis { display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+  .kpi { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+         padding:13px 18px; min-width:140px; box-shadow:var(--shadow); }
+  .kpi .label { color:var(--muted); font-size:12px; }
+  .kpi .value { font-size:23px; font-weight:600; margin-top:3px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+          margin-bottom:18px; overflow:hidden; box-shadow:var(--shadow); }
+  .card-head { display:flex; align-items:center; padding:12px 18px; border-bottom:1px solid var(--line); }
+  .card-head h2 { font-size:14px; margin:0; font-weight:600; }
+  .card-head .spacer { margin-left:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th,td { text-align:left; padding:9px 14px; border-bottom:1px solid var(--line); font-size:13px; }
+  th { color:var(--muted); font-weight:500; background:#fafaf8; }
+  tr.crit td { background:var(--crit-soft); }
+  tr.crit td:first-child { font-weight:600; color:var(--crit); }
+  tr.clickable { cursor:pointer; }
+  tr.clickable:hover td { background:var(--accent-soft); }
+  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:11px; }
+  .pill.crit { background:var(--crit); color:#fff; }
+  .pill.float { background:var(--accent-soft); color:var(--accent); }
+  .rowact button { padding:3px 8px; font-size:12px; }
+  .gantt { padding:14px 18px; overflow-x:auto; }
+  .grow { display:flex; align-items:center; height:30px; }
+  .grow .nm { width:150px; font-size:13px; flex-shrink:0; white-space:nowrap; overflow:hidden;
+              text-overflow:ellipsis; }
+  svg.bars { width:100%; display:block; }
+  .empty { padding:46px; text-align:center; color:var(--muted); }
+  .err { background:var(--crit-soft); color:var(--crit); padding:10px 14px; border-radius:8px;
+         margin-bottom:14px; display:none; }
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none;
+              align-items:center; justify-content:center; z-index:50; }
+  .modal { background:var(--panel); border-radius:14px; padding:24px; width:420px; }
+  .modal h3 { margin:0 0 14px; font-size:16px; }
+  .modal label { display:block; font-size:12px; color:var(--muted); margin:11px 0 4px; }
+  .modal input { width:100%; padding:8px 11px; border:1px solid var(--line); border-radius:8px;
+                 font:inherit; font-size:14px; }
+  .modal input:focus { outline:none; border-color:var(--accent); }
+  .modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .hint { color:var(--muted); font-size:12px; margin-top:4px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Mini-P7</h1>
-  <span class="sub" id="proj-name">— no project —</span>
-  <div class="bar">
-    <span class="sub" id="user-email" style="margin-right:4px"></span>
-    <button onclick="loadSample()">Load sample</button>
-    <button class="primary" onclick="runSchedule()">▶ Schedule</button>
-    <button onclick="logout()">Sign out</button>
-  </div>
+  <h1 onclick="showProjects()">Mini-P7</h1>
+  <span class="crumb" id="crumb"></span>
+  <span class="spacer"></span>
+  <span class="email" id="email"></span>
+  <button onclick="logout()">Sign out</button>
 </header>
-
 <main>
   <div class="err" id="err"></div>
-
-  <div class="kpis">
-    <div class="kpi"><div class="label">Project duration</div><div class="value" id="kpi-dur">—</div></div>
-    <div class="kpi"><div class="label">Activities</div><div class="value" id="kpi-count">—</div></div>
-    <div class="kpi"><div class="label">Critical path</div><div class="value" id="kpi-crit" style="font-size:15px">—</div></div>
-  </div>
-
-  <div class="card">
-    <h2>Schedule</h2>
-    <div id="table-wrap"><div class="empty">Load the sample, then press Schedule.</div></div>
-  </div>
-
-  <div class="card">
-    <h2>Gantt</h2>
-    <div class="gantt" id="gantt"><div class="empty">No schedule yet.</div></div>
-  </div>
+  <div id="view"></div>
 </main>
 
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-title">Add task</h3>
+    <div class="grid2">
+      <div><label>ID</label><input id="m-id" placeholder="A" /></div>
+      <div><label>Duration (days)</label><input id="m-dur" type="number" min="0" value="1" /></div>
+    </div>
+    <label>Name</label><input id="m-name" placeholder="Foundation" />
+    <label>Predecessors (comma-separated IDs)</label><input id="m-pred" placeholder="A, B" />
+    <div class="hint">Leave blank if this task has no dependencies.</div>
+    <label>Resource (optional)</label><input id="m-res" placeholder="Electrical Team" />
+    <div class="actions">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveActivity()">Save task</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// Require a session; bounce to login if there isn't one.
 const TOKEN = sessionStorage.getItem("minip7_token");
 const ORG = sessionStorage.getItem("minip7_org");
 const EMAIL = sessionStorage.getItem("minip7_email") || "";
-if (!TOKEN || !ORG) { window.location.href = "/login"; }
+if (!TOKEN || !ORG) location.href = "/login";
+document.getElementById("email").textContent = EMAIL;
 
-const PROJECT = "demo";
-let lastData = null;
+let currentProject = null, editingId = null;
 
 async function api(method, path, body) {
-  const opts = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + TOKEN,
-    },
-  };
+  const opts = { method, headers: { "Content-Type":"application/json", "Authorization":"Bearer "+TOKEN } };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(path, opts);
-  if (res.status === 401) {            // token expired/invalid -> re-login
-    sessionStorage.clear();
-    window.location.href = "/login";
-    throw new Error("Session expired.");
-  }
-  if (!res.ok) {
-    const detail = (await res.json().catch(() => ({}))).detail || res.statusText;
-    throw new Error(detail);
-  }
-  return res.json();
+  if (res.status === 401) { sessionStorage.clear(); location.href="/login"; throw new Error("Session expired"); }
+  if (!res.ok) { const d=(await res.json().catch(()=>({}))).detail; throw new Error(typeof d==="string"?d:"Request failed"); }
+  return res.status === 204 ? null : res.json();
 }
-function showErr(msg) {
-  const e = document.getElementById("err");
-  e.textContent = msg; e.style.display = "block";
-  setTimeout(() => (e.style.display = "none"), 4000);
-}
-function logout() { sessionStorage.clear(); window.location.href = "/login"; }
+function showErr(m){ const e=document.getElementById("err"); e.textContent=m; e.style.display="block"; setTimeout(()=>e.style.display="none",4500); }
+function logout(){ sessionStorage.clear(); location.href="/login"; }
+const base = () => `/api/organizations/${ORG}/projects`;
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
-async function ensureProject() {
-  // create the demo project in *this user's* org; ignore "already exists"
+async function showProjects() {
+  currentProject = null;
+  document.getElementById("crumb").textContent = "Projects";
+  document.getElementById("view").innerHTML = `<div class="card"><div class="card-head"><h2>Your projects</h2>
+    <span class="spacer"></span><button class="primary" onclick="newProject()">+ New project</button></div>
+    <div id="proj-list"><div class="empty">Loading…</div></div></div>`;
   try {
-    await api("POST", `/api/organizations/${ORG}/projects?id=${PROJECT}&name=Harbor+View+Office+Complex`);
-  } catch (e) {}
+    const projects = await api("GET", base());
+    const el = document.getElementById("proj-list");
+    if (!projects.length) { el.innerHTML = `<div class="empty">No projects yet. Create one to get started.</div>`; return; }
+    let html = `<table><thead><tr><th>Name</th><th>Tasks</th><th></th></tr></thead><tbody>`;
+    for (const p of projects) html += `<tr class="clickable" onclick="openProject('${p.id}')">
+      <td>${escapeHtml(p.name)}</td><td>${p.activities.length}</td>
+      <td style="text-align:right" class="rowact"><button onclick="event.stopPropagation();openProject('${p.id}')">Open</button></td></tr>`;
+    el.innerHTML = html + "</tbody></table>";
+  } catch(e){ showErr(e.message); }
 }
-async function loadSample() {
-  try {
-    await ensureProject();
-    await api("POST", `/api/organizations/${ORG}/projects/${PROJECT}/sample`);
-    await runSchedule();
-  } catch (e) { showErr(e.message); }
+async function newProject() {
+  const name = prompt("Project name:", "New Project"); if (!name) return;
+  const id = "p_" + Math.random().toString(36).slice(2,9);
+  try { await api("POST", `${base()}?id=${id}&name=${encodeURIComponent(name)}`); openProject(id); }
+  catch(e){ showErr(e.message); }
 }
-async function runSchedule() {
-  try {
-    await ensureProject();
-    const data = await api("POST", `/api/organizations/${ORG}/projects/${PROJECT}/schedule`);
-    lastData = data;
-    render(data);
-  } catch (e) { showErr(e.message); }
+async function openProject(pid){ currentProject=pid; try{ renderProject(await scheduleOrGet(pid)); }catch(e){ showErr(e.message);} }
+async function scheduleOrGet(pid){
+  try { return await api("POST", `${base()}/${pid}/schedule`); }
+  catch(e){ const proj=await api("GET", `${base()}/${pid}`);
+    return {project_id:pid, duration:0, critical_path:[], activities:proj.activities}; }
 }
-function render(data) {
-  document.getElementById("proj-name").textContent = "Harbor View Office Complex";
-  document.getElementById("kpi-dur").textContent = data.duration + " days";
-  document.getElementById("kpi-count").textContent = data.activities.length;
-  document.getElementById("kpi-crit").textContent = data.critical_path.join(" → ");
-
-  const acts = data.activities;
-  let html = "<table><thead><tr><th>ID</th><th>Name</th><th>Dur</th><th>Pred</th>" +
-    "<th>ES</th><th>EF</th><th>LS</th><th>LF</th><th>Float</th><th></th></tr></thead><tbody>";
-  for (const a of acts) {
-    const pill = a.is_critical
-      ? '<span class="pill crit">critical</span>'
-      : `<span class="pill float">${a.total_float}d float</span>`;
-    html += `<tr class="${a.is_critical ? "crit" : ""}">
-      <td>${a.id}</td><td>${a.name}</td><td>${a.duration}</td>
-      <td>${a.predecessors.join(",") || "—"}</td>
-      <td>${a.ES}</td><td>${a.EF}</td><td>${a.LS}</td><td>${a.LF}</td>
-      <td>${a.total_float}</td><td>${pill}</td></tr>`;
+async function renderProject(data){
+  const proj = await api("GET", `${base()}/${currentProject}`);
+  document.getElementById("crumb").textContent = "Projects › " + proj.name;
+  const acts = data.activities || proj.activities;
+  const scheduled = (data.duration||0) > 0;
+  document.getElementById("view").innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="label">Duration</div><div class="value">${scheduled?data.duration+" days":"—"}</div></div>
+      <div class="kpi"><div class="label">Tasks</div><div class="value">${acts.length}</div></div>
+      <div class="kpi"><div class="label">Critical path</div><div class="value" style="font-size:15px">${(data.critical_path||[]).join(" → ")||"—"}</div></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Tasks</h2><span class="spacer"></span>
+      <button onclick="loadSample()">Load sample</button>
+      <button class="primary" onclick="openModal()">+ Add task</button>
+      <button class="primary" onclick="reschedule()">▶ Schedule</button></div>
+      <div id="task-table"></div></div>
+    <div class="card"><div class="card-head"><h2>Gantt</h2></div>
+      <div class="gantt" id="gantt"></div></div>`;
+  renderTable(acts, scheduled);
+  renderGantt(acts, data.duration||0);
+}
+function renderTable(acts, scheduled){
+  const el=document.getElementById("task-table");
+  if(!acts.length){ el.innerHTML=`<div class="empty">No tasks yet. Add one, or load the sample.</div>`; return; }
+  let html=`<table><thead><tr><th>ID</th><th>Name</th><th>Dur</th><th>Pred</th><th>Res</th>
+    <th>ES</th><th>EF</th><th>Float</th><th></th><th></th></tr></thead><tbody>`;
+  for(const a of acts){
+    const pill=scheduled?(a.is_critical?'<span class="pill crit">critical</span>':`<span class="pill float">${a.total_float}d float</span>`):"";
+    html+=`<tr class="${a.is_critical&&scheduled?"crit":""}">
+      <td>${a.id}</td><td>${escapeHtml(a.name)}</td><td>${a.duration}</td>
+      <td>${(a.predecessors||[]).join(",")||"—"}</td><td>${escapeHtml(a.resource||"—")}</td>
+      <td>${scheduled?a.ES:"—"}</td><td>${scheduled?a.EF:"—"}</td><td>${scheduled?pill:"—"}</td>
+      <td class="rowact"><button onclick='editActivity(${JSON.stringify(JSON.stringify(a))})'>Edit</button></td>
+      <td class="rowact"><button class="danger" onclick="deleteActivity('${a.id}')">Delete</button></td></tr>`;
   }
-  html += "</tbody></table>";
-  document.getElementById("table-wrap").innerHTML = html;
-
-  const total = data.duration || 1;
-  let g = "";
-  for (const a of acts) {
-    const left = (a.ES / total) * 100;
-    const width = Math.max((a.duration / total) * 100, 1.5);
-    g += `<div class="row"><div class="name">${a.id} · ${a.name}</div>
-      <div class="track"><div class="baar ${a.is_critical ? "crit" : "norm"}"
-        style="left:${left}%;width:${width}%"></div></div></div>`;
-  }
-  document.getElementById("gantt").innerHTML = g;
+  el.innerHTML=html+"</tbody></table>";
 }
-loadSample();
-document.getElementById("user-email").textContent = EMAIL;
+function renderGantt(acts, total){
+  const el=document.getElementById("gantt");
+  if(!acts.length||!total){ el.innerHTML=`<div class="empty">Schedule the project to see the Gantt.</div>`; return; }
+  const rowH=30, barH=16, padY=7, W=760, scale=W/total;
+  const pos={}; acts.forEach((a,i)=>pos[a.id]=i);
+  let rows="", arrows="";
+  acts.forEach((a,i)=>{
+    const x=a.ES*scale, w=Math.max(a.duration*scale,3), y=i*rowH+padY;
+    const color=a.is_critical?"#c0392b":"#185fa5";
+    rows+=`<rect x="${x}" y="${y}" width="${w}" height="${barH}" rx="3" fill="${color}"></rect>
+           <text x="${x+4}" y="${y+barH-4}" font-size="11" fill="#fff">${a.id}</text>`;
+    (a.predecessors||[]).forEach(pid=>{
+      if(pos[pid]===undefined) return;
+      const pa=acts[pos[pid]];
+      const fx=pa.EF*scale, fy=pos[pid]*rowH+padY+barH/2, tx=a.ES*scale, ty=y+barH/2;
+      arrows+=`<path d="M${fx},${fy} C${fx+14},${fy} ${tx-14},${ty} ${tx},${ty}" fill="none" stroke="#9a9a93" stroke-width="1.3"></path>
+               <path d="M${tx},${ty} l-5,-3 l0,6 z" fill="#9a9a93"></path>`;
+    });
+  });
+  const H=acts.length*rowH+padY;
+  const labels=acts.map(a=>`<div class="grow"><div class="nm">${a.id} · ${escapeHtml(a.name)}</div></div>`).join("");
+  el.innerHTML=`<div style="display:flex"><div style="flex-shrink:0">${labels}</div>
+    <div style="flex:1"><svg class="bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">${arrows}${rows}</svg></div></div>
+    <div style="margin-top:8px;font-size:12px;color:#6f6e68"><span style="color:#c0392b">■</span> critical &nbsp;
+    <span style="color:#185fa5">■</span> has float &nbsp; arrows = dependencies</div>`;
+}
+async function reschedule(){ try{ renderProject(await api("POST", `${base()}/${currentProject}/schedule`)); }catch(e){ showErr(e.message);} }
+async function loadSample(){ try{ await api("POST", `${base()}/${currentProject}/sample`); reschedule(); }catch(e){ showErr(e.message);} }
+
+function openModal(){ editingId=null; document.getElementById("modal-title").textContent="Add task";
+  ["m-id","m-name","m-pred","m-res"].forEach(i=>document.getElementById(i).value="");
+  document.getElementById("m-dur").value="1"; document.getElementById("m-id").disabled=false;
+  document.getElementById("modal-bg").style.display="flex"; }
+function editActivity(json){ const a=JSON.parse(json); editingId=a.id;
+  document.getElementById("modal-title").textContent="Edit task";
+  document.getElementById("m-id").value=a.id; document.getElementById("m-id").disabled=true;
+  document.getElementById("m-name").value=a.name; document.getElementById("m-dur").value=a.duration;
+  document.getElementById("m-pred").value=(a.predecessors||[]).join(", ");
+  document.getElementById("m-res").value=a.resource||"";
+  document.getElementById("modal-bg").style.display="flex"; }
+function closeModal(){ document.getElementById("modal-bg").style.display="none"; }
+async function saveActivity(){
+  const id=document.getElementById("m-id").value.trim(), name=document.getElementById("m-name").value.trim();
+  const dur=parseInt(document.getElementById("m-dur").value,10);
+  const pred=document.getElementById("m-pred").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const res=document.getElementById("m-res").value.trim()||null;
+  if(!id||!name) return showErr("ID and name are required.");
+  const activity={id,name,duration:isNaN(dur)?0:dur,predecessors:pred,resource:res};
+  try{
+    if(editingId) await api("PUT", `${base()}/${currentProject}/activities/${editingId}`, activity);
+    else await api("POST", `${base()}/${currentProject}/activities`, activity);
+    closeModal(); reschedule();
+  }catch(e){ showErr(e.message); }
+}
+async function deleteActivity(aid){ if(!confirm(`Delete task ${aid}?`)) return;
+  try{ await api("DELETE", `${base()}/${currentProject}/activities/${aid}`); reschedule(); }catch(e){ showErr(e.message); } }
+
+showProjects();
 </script>
 </body>
 </html>
