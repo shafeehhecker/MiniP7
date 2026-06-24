@@ -1,0 +1,45 @@
+# Roadmap
+
+> Category: **Explanation**. The delivery plan. Each phase produces exactly one
+> reusable commons that later phases consume. For the packages themselves, see
+> [the commons registry](architecture/commons.md).
+
+Each phase has an objective, a single deliverable (the commons), a definition of
+done, and a reusability contract — what downstream gets for free.
+
+## Phase 0 — Repository & toolchain commons
+- **Deliverable:** the monorepo, CI, shared configs, commit conventions, ADR process.
+- **Done when:** a trivial package can be added, tested, and released through CI.
+- **Reuse:** every later package inherits CI, versioning, and conventions.
+
+## Phase 1 — Domain schema commons (`schema`)
+- **Deliverable:** the canonical model in Pydantic, generating TypeScript types.
+- **Done when:** a model change regenerates both languages in one command and CI
+  fails on drift.
+- **Reuse:** every package and both languages share one definition.
+
+## Phase 2 — Core engine commons (`engine`)
+- **Deliverable:** pure CPM extended for calendars and relationship types, plus EVM.
+- **Done when:** it passes property-based tests and runs identically in tests, the
+  CLI, and batch jobs.
+- **Reuse:** the single source of scheduling truth for every interface.
+
+## Phase 3 — Services + persistence commons (`services`, `persistence`)
+- **Deliverable:** storage-agnostic repositories and the orchestration layer.
+- **Done when:** the same service tests pass against an in-memory repo and a real DB.
+- **Reuse:** API and CLI drive identical business logic.
+
+## Phase 4 — API contract + typed client commons (`client`)
+- **Deliverable:** FastAPI server and a TypeScript client generated from its OpenAPI.
+- **Done when:** a breaking API change fails the frontend build at compile time.
+- **Reuse:** the frontend never hand-writes a fetch call or a response type.
+
+## Phase 5 — UI commons (`ui`)
+- **Deliverable:** design tokens, primitives, wrapped Gantt + data grid, data hooks.
+- **Done when:** a new view is assembled from primitives with zero raw styling.
+- **Reuse:** every feature vertical is composition, not construction.
+
+## Phases 6+ — Feature verticals
+Schedule/Gantt, Resources & loading, Costs & EVM, Dashboard/Portfolio, then
+Risks/Issues/Docs. These consume all the commons. When a vertical finds shared
+logic, it pushes it *down* into a commons — never sideways into another vertical.
