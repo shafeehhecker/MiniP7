@@ -1,0 +1,23 @@
+site_name: Mini-P7 Documentation
+site_description: CPM scheduler built on commons + documentation-as-a-product
+theme:
+  name: material
+  features: [navigation.sections, navigation.expand, content.code.copy, search.suggest]
+nav:
+  - Home: index.md
+  - Learn:
+      - Getting started: guides/getting-started.md
+  - How-to:
+      - Add a commons package: guides/adding-a-package.md
+  - Reference:
+      - Commons registry: architecture/commons.md
+      - Glossary: domain/glossary.md
+      - Package README template: reference/package-readme-template.md
+  - Understand:
+      - Architecture: architecture/ARCHITECTURE.md
+      - How CPM works: domain/cpm.md
+      - Roadmap: ROADMAP.md
+      - Repository strategy: REPO_STRATEGY.md
+      - Documentation standards: DOCUMENTATION_STANDARDS.md
+      - Decision log: adr/README.md
+markdown_extensions: [admonition, pymdownx.superfences, tables, toc]

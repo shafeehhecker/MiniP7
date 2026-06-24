@@ -1,0 +1,8 @@
+[project]
+name = "minip7-engine"
+version = "0.1.0"
+description = "Pure CPM + EVM computation."
+requires-python = ">=3.11"
+dependencies = ["minip7-schema"]
+[tool.setuptools.packages.find]
+where = ["src"]
