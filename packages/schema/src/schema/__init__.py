@@ -9,6 +9,10 @@ from .models import (  # noqa: F401
     RelationshipType,
     Project,
     ActivityStatus,
+    Organization,
+    User,
+    Role,
+    Membership,
 )
 
 __all__ = [
@@ -17,4 +21,8 @@ __all__ = [
     "RelationshipType",
     "Project",
     "ActivityStatus",
+    "Organization",
+    "User",
+    "Role",
+    "Membership",
 ]

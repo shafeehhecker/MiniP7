@@ -20,3 +20,5 @@
 | [0002](0002-dependency-rule.md) | Enforce the inward dependency rule | Accepted |
 | [0003](0003-schema-single-source-of-truth.md) | One schema, generated into every language | Accepted |
 | [0004](0004-gantt-build-vs-buy.md) | Gantt component: build vs buy | Proposed |
+| [0005](0005-multi-tenancy.md) | Multi-tenant model (org → user → project) | Accepted |
+| [0006](0006-authentication.md) | Authentication approach | Proposed |

@@ -94,8 +94,61 @@ class Activity(BaseModel):
                 f"LS={self.LS} LF={self.LF} | TF={self.total_float} FF={self.free_float}")
 
 
-class Project(BaseModel):
-    """A named container of activities."""
+# ---------------------------------------------------------------------------
+# Multi-tenancy (see ADR-0005)
+# ---------------------------------------------------------------------------
+# The product serves small teams: a company (Organization) owns its projects,
+# and people (Users) belong to the company via a Membership that carries a Role.
+# Every Project belongs to exactly one Organization, so data is always scoped to
+# a tenant. This boundary is the spine of the product and is designed in from the
+# start rather than retrofitted.
+
+
+class Role(str, Enum):
+    """A member's role within an organization. Drives authorization."""
+    OWNER = "owner"      # full control, incl. billing and deleting the org
+    ADMIN = "admin"      # manage members and all projects
+    MEMBER = "member"    # create and edit projects
+    VIEWER = "viewer"    # read-only
+
+
+class User(BaseModel):
+    """A person. Identity only — no org-specific data lives here.
+
+    Authentication (passwords, tokens) is handled by the auth layer, not stored
+    on this model. A user may belong to several organizations via memberships.
+    """
     id: str
+    email: str
+    name: str | None = None
+
+    @field_validator("email")
+    @classmethod
+    def _email_shape(cls, v: str) -> str:
+        v = v.strip().lower()
+        if "@" not in v or "." not in v.split("@")[-1]:
+            raise ValueError("Invalid email address.")
+        return v
+
+
+class Membership(BaseModel):
+    """Links a User to an Organization with a Role. The join is where roles live —
+    the same person can be an admin in one org and a viewer in another."""
+    user_id: str
+    organization_id: str
+    role: Role = Role.MEMBER
+
+
+class Organization(BaseModel):
+    """A tenant: a company or team that owns projects and has members."""
+    id: str
+    name: str
+    memberships: List[Membership] = Field(default_factory=list)
+
+
+class Project(BaseModel):
+    """A named container of activities, owned by exactly one organization."""
+    id: str
+    organization_id: str
     name: str = "My Project"
     activities: List[Activity] = Field(default_factory=list)

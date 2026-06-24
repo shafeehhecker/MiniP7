@@ -1,1 +1,1 @@
-from .project_service import ProjectService, ServiceError  # noqa: F401
+from .project_service import ProjectService, ServiceError, PermissionError_  # noqa: F401
