@@ -1,0 +1,11 @@
+# Each commons package has a single owning reviewer.
+/packages/schema/        @schema-owner
+/packages/engine/        @engine-owner
+/packages/persistence/   @persistence-owner
+/packages/services/      @services-owner
+/packages/client/        @client-owner
+/packages/ui/            @ui-owner
+/apps/api/               @api-owner
+/apps/web/               @web-owner
+/apps/cli/               @cli-owner
+/docs/                   @docs-owner
