@@ -18,14 +18,28 @@ fields). Breaking changes are expected until `1.0.0`.
 
 ## Public API
 
-- `Activity` — a unit of work with duration, predecessors, and computed CPM fields.
-- (planned) `Relationship`, `WBSNode`, `Resource`, `Assignment`, `Calendar`,
-  `Baseline`, `Project`.
+- `Activity` — a unit of work with duration, predecessors, a `type`
+  (`ActivityType`), and computed CPM fields.
+- `ActivityType` — `task | milestone | level_of_effort | summary`
+  (see [ADR-0008](../../docs/adr/0008-activity-types.md)).
+- `ActivityStatus`, `Relationship`, `RelationshipType` — status and (modelled)
+  typed dependencies.
+- `Project`, `Organization`, `Membership`, `Role` — multi-tenant containers and
+  roles.
+- `User`, `UserPreferences`, `UnitSystem`, `DateFormat`, `Theme` — identity plus
+  per-user display settings (see [ADR-0007](../../docs/adr/0007-user-preferences.md)).
+- `Currency`, `COMMON_CURRENCIES` — organization currency value object and a
+  starter catalogue (see [ADR-0009](../../docs/adr/0009-currency.md)).
+- `SignupRequest`, `LoginRequest`, `AuthResponse` — auth payloads.
+- (planned) `WBSNode`, `Resource`, `Assignment`, `Calendar`, `Baseline`.
 
 ## Invariants
 
-- Models validate on construction; an invalid model cannot exist.
-- Models are serialisable to and from plain dicts (`to_dict` / `from_dict`).
+- Models validate on construction; an invalid model cannot exist. In particular,
+  a `MILESTONE` activity must have `duration == 0`, and a `Currency` code must be
+  three letters (ISO 4217).
+- Models are serialisable to and from JSON via Pydantic; new fields carry
+  defaults, so older stored records load without migration.
 - The schema imports nothing from other packages — it is the bottom of the graph.
 
 ## Dependencies
