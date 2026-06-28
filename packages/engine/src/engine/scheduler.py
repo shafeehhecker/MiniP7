@@ -1,10 +1,23 @@
 """
-CPM Scheduling Engine for Mini-P6.
+CPM Scheduling Engine for Mini-P7.
 Performs Forward Pass, Backward Pass, Float calculation, and Critical Path identification.
+
+Activity types (see ADR-0008)
+-----------------------------
+The engine schedules by ``duration`` and ``predecessors``, so two activity types
+are handled fully and correctly today:
+
+- ``TASK`` — scheduled normally.
+- ``MILESTONE`` — a zero-duration task (the schema guarantees ``duration == 0``),
+  so it falls out of the standard passes with ``ES == EF`` and no special case.
+
+``LEVEL_OF_EFFORT`` and ``SUMMARY`` are accepted and scheduled like tasks for now;
+their distinct behaviour (span-from-relationships and WBS roll-up) is deferred
+until typed relationships and the WBS land. The engine never rejects them.
 """
 from typing import Dict, List, Optional, Tuple
 from collections import deque
-from schema import Activity
+from schema import Activity, ActivityType
 
 
 class SchedulerError(Exception):
@@ -171,6 +184,14 @@ class CPMScheduler:
             act_id
             for act_id, act in self.activities.items()
             if act.is_critical
+        ]
+
+    def get_milestones(self) -> List[str]:
+        """Return IDs of milestone activities (zero-duration markers)."""
+        return [
+            act_id
+            for act_id, act in self.activities.items()
+            if act.type == ActivityType.MILESTONE
         ]
 
     def project_duration(self) -> int:
