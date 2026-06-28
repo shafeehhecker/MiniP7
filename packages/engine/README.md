@@ -21,8 +21,16 @@ relationship types beyond finish-to-start are in progress.
 - `CPMScheduler(activities)` — construct with a `{id: Activity}` mapping.
 - `.schedule()` — run forward + backward passes, populate CPM fields in place.
 - `.get_critical_path()` — list of activity ids with zero total float.
+- `.get_milestones()` — list of activity ids that are milestones.
 - `.project_duration()` — the largest early finish.
 - `SchedulerError` — raised on cycles or unknown predecessors.
+
+## Activity types
+
+The engine schedules by `duration` and `predecessors`, so `TASK` and `MILESTONE`
+are handled fully and correctly (a milestone is a zero-duration task). `LEVEL_OF_EFFORT`
+and `SUMMARY` are accepted and scheduled as tasks for now; their special
+behaviour is deferred (see [ADR-0008](../../docs/adr/0008-activity-types.md)).
 
 ## Invariants
 
