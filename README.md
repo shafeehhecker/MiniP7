@@ -46,11 +46,18 @@ It also differs in *how* it's built, which is the point:
 - **Critical Path Method engine** — forward/backward pass computing early/late
   start and finish, total and free float, and the critical path. Detects cyclic
   and invalid dependencies.
+- **Activity types** — tasks and milestones (zero-duration markers) are fully
+  scheduled; level-of-effort and summary are modelled and ready for their special
+  behaviour once typed relationships and the WBS land.
 - **Multi-tenant** — organizations own projects; users belong to organizations
   via memberships with roles (owner / admin / member / viewer). Data is always
   scoped to a tenant, enforced and tested.
 - **Self-hosted authentication** — sign-up and login with bcrypt-hashed passwords
   and signed, expiring JWTs. No third-party identity provider.
+- **Per-user preferences** — colour theme (light / dark / system), duration units
+  (days / hours), and date format, applied in the UI.
+- **Organization currency** — an ISO 4217 currency per organization, ready for
+  cost rollups.
 - **REST API** — FastAPI with auto-generated OpenAPI docs at `/docs`.
 - **Zero-build web UI** — a schedule table and Gantt chart served by the API; no
   Node or build step required to run it.
@@ -119,10 +126,11 @@ Organised by the [Diátaxis](https://diataxis.fr) model:
 
 ```bash
 PYTHONPATH=packages/schema/src:packages/engine/src:packages/persistence/src:packages/services/src:packages/auth/src \
-  python -m pytest packages/engine/tests packages/services/tests packages/auth/tests
+  python -m pytest packages/schema/tests packages/engine/tests packages/services/tests packages/auth/tests
 ```
 
-Coverage includes the CPM math (floats, cycles, parallel paths), tenancy
+Coverage includes the schema invariants (milestone duration, currency codes,
+preference defaults), the CPM math (floats, cycles, parallel paths), tenancy
 isolation (one org cannot see another's data), role permissions, and auth
 (password hashing, token expiry and tampering).
 
