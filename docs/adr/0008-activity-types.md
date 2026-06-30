@@ -1,7 +1,7 @@
 # ADR-0008: Activity types (task, milestone, level-of-effort, summary)
 
 - **Status:** Accepted
-- **Date:** 2026-06-27
+- **Date:** 2026-06-30
 - **Deciders:** Core team
 - **Supersedes:** —
 - **Superseded by:** —
