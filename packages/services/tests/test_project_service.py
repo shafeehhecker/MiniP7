@@ -141,3 +141,58 @@ def test_update_and_delete_activity():
     # delete missing
     with pytest.raises(ServiceError):
         s.delete_activity("acme", "u1", "p1", "ghost")
+
+
+# ---- user preferences ----
+def test_preferences_default_then_update(svc, owner):
+    from schema import UserPreferences, Theme, UnitSystem
+    svc.register_user("dev@acme.com", "password123", "Dev")
+    user = svc._repo.get_user_by_email("dev@acme.com")
+    prefs = svc.get_preferences(user.id)
+    assert prefs == UserPreferences()  # safe defaults
+
+    updated = svc.update_preferences(
+        user.id, UserPreferences(theme=Theme.DARK, units=UnitSystem.HOURS))
+    assert updated.theme == Theme.DARK
+    # persisted
+    assert svc.get_preferences(user.id).units == UnitSystem.HOURS
+
+
+def test_preferences_unknown_user_raises(svc):
+    with pytest.raises(ServiceError):
+        svc.get_preferences("nobody")
+
+
+# ---- currency ----
+def test_owner_can_set_currency(svc, owner):
+    from schema import Currency
+    svc.create_organization("acme", "Acme", owner)
+    org = svc.set_organization_currency(
+        "acme", owner.id, Currency(code="EUR", symbol="€", name="Euro"))
+    assert org.currency.code == "EUR"
+
+
+def test_viewer_cannot_set_currency(svc, owner):
+    from schema import Currency, Role, User
+    svc.create_organization("acme", "Acme", owner)
+    viewer = User(id="v1", email="v@acme.com")
+    svc._repo.save_user(viewer)
+    svc.add_member("acme", owner.id, viewer.id, Role.VIEWER)
+    with pytest.raises(PermissionError_):
+        svc.set_organization_currency(
+            "acme", viewer.id, Currency(code="GBP", symbol="£", name="Pound"))
+
+
+# ---- activity type flows through scheduling ----
+def test_activity_type_survives_schedule(svc, owner):
+    from schema import Activity, ActivityType
+    org, proj = _org_with_project(svc, owner)
+    svc.add_activity(org, owner.id, proj,
+                     Activity(id="M", name="Gate", duration=0,
+                              type=ActivityType.MILESTONE))
+    svc.add_activity(org, owner.id, proj,
+                     Activity(id="T", name="Work", duration=3, predecessors=["M"]))
+    r = svc.schedule(org, owner.id, proj)
+    types = {a["id"]: a["type"] for a in r["activities"]}
+    assert types["M"] == "milestone"
+    assert types["T"] == "task"
