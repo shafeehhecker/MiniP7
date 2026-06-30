@@ -22,3 +22,6 @@
 | [0004](0004-gantt-build-vs-buy.md) | Gantt component: build vs buy | Proposed |
 | [0005](0005-multi-tenancy.md) | Multi-tenant model (org → user → project) | Accepted |
 | [0006](0006-authentication.md) | Authentication approach | Proposed |
+| [0007](0007-user-preferences.md) | User preferences embedded in the user | Accepted |
+| [0008](0008-activity-types.md) | Activity types (task / milestone / LOE / summary) | Accepted |
+| [0009](0009-currency.md) | Organization-level currency | Accepted |
