@@ -47,6 +47,19 @@ through a form, run the schedule, and an interactive Gantt with dependency
 arrows. A React migration remains an option if the component ecosystem is
 needed later; the zero-build approach avoids a Node toolchain for now.
 
+## Built since: activity types, preferences, currency
+
+Three feature increments landed on top of the commons without changing the
+dependency graph (each is documented by an ADR):
+
+- **Activity types** (task / milestone / level-of-effort / summary) — schema +
+  engine + UI, with task and milestone fully scheduled
+  ([ADR-0008](adr/0008-activity-types.md)).
+- **User preferences** (theme / units / date format) — embedded in the user and
+  applied in the UI ([ADR-0007](adr/0007-user-preferences.md)).
+- **Organization currency** — an ISO 4217 setting per organization, ready for
+  costs ([ADR-0009](adr/0009-currency.md)).
+
 ## Phases 6+ — Feature verticals
 Schedule/Gantt, Resources & loading, Costs & EVM, Dashboard/Portfolio, then
 Risks/Issues/Docs. These consume all the commons. When a vertical finds shared
