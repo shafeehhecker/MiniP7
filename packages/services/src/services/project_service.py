@@ -13,6 +13,7 @@ from typing import List
 
 from schema import (
     Activity, Project, Organization, User, Membership, Role,
+    UserPreferences, Currency,
 )
 from engine import CPMScheduler, SchedulerError
 from auth import hash_password, verify_password, create_access_token
@@ -81,6 +82,26 @@ class ProjectService:
                 "organization_id": org_id}
 
     # ------------------------------------------------------------------
+    # User preferences (display settings; see ADR-0007)
+    # ------------------------------------------------------------------
+    def get_preferences(self, user_id: str) -> UserPreferences:
+        """Return a user's display preferences. Raises if the user is unknown."""
+        user = self._get_user(user_id)
+        return user.preferences
+
+    def update_preferences(self, user_id: str,
+                           preferences: UserPreferences) -> UserPreferences:
+        """Replace a user's display preferences and persist them.
+
+        Preferences are presentation-only — they never change the computed
+        schedule — so any member may set their own without a role check.
+        """
+        user = self._get_user(user_id)
+        user.preferences = preferences
+        self._repo.save_user(user)
+        return user.preferences
+
+    # ------------------------------------------------------------------
     # Organizations & membership
     # ------------------------------------------------------------------
     def create_organization(self, org_id: str, name: str, owner: User) -> Organization:
@@ -108,6 +129,20 @@ class ProjectService:
 
     def list_my_organizations(self, user_id: str) -> List[Organization]:
         return self._repo.list_orgs_for_user(user_id)
+
+    def set_organization_currency(self, org_id: str, actor_id: str,
+                                  currency: Currency) -> Organization:
+        """Set the organization's currency. Owners and admins only.
+
+        Currency is a display setting today (no cost rollups yet, see ADR-0009),
+        but changing it is an organization-wide setting, so it is gated like
+        other administrative actions.
+        """
+        org = self._get_org(org_id)
+        self._require_role(org, actor_id, {Role.OWNER, Role.ADMIN})
+        org.currency = currency
+        self._repo.save_org(org)
+        return org
 
     # ------------------------------------------------------------------
     # Projects (all tenant-scoped + permission-checked)
@@ -213,6 +248,12 @@ class ProjectService:
         if not org:
             raise ServiceError(f"No organization '{org_id}'.")
         return org
+
+    def _get_user(self, user_id: str) -> User:
+        user = self._repo.get_user(user_id)
+        if not user:
+            raise ServiceError(f"No user '{user_id}'.")
+        return user
 
     def _membership(self, org: Organization, user_id: str):
         return next((m for m in org.memberships if m.user_id == user_id), None)
