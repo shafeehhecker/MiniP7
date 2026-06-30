@@ -9,6 +9,24 @@
 **Activity** — A unit of work with a duration and dependencies. The atom of a
 schedule.
 
+**Activity type** — The kind of an activity, which governs how it schedules:
+**task** (ordinary work with a duration), **milestone** (a zero-duration marker
+for a point in time), **level of effort** (sustained work whose span is driven by
+other activities), and **summary** (a roll-up of the activities beneath a WBS
+node). Task and milestone are fully scheduled today; level-of-effort and summary
+are modelled and scheduled as tasks until typed relationships and the WBS land
+(see [ADR-0008](../adr/0008-activity-types.md)).
+
+**Milestone** — A zero-duration activity marking a point in time, such as a
+deliverable or a gate. A milestone always has `duration == 0`.
+
+**Level of effort (LOE)** — An activity whose duration is determined by the
+activities it supports rather than by its own estimate (e.g. project management
+running for the life of a phase).
+
+**Summary activity** — An activity that summarises the work of a WBS branch,
+rolling up the dates of its children.
+
 **Duration** — How long an activity takes, in working days. May be zero (a
 milestone).
 
@@ -88,3 +106,21 @@ the data date.
 **BAC — Budget at Completion** — The total planned budget.
 
 **EAC — Estimate at Completion** — The forecast total cost, commonly `BAC / CPI`.
+
+## Preferences & organization settings
+
+**User preferences** — Per-user display settings that never change the computed
+schedule: a colour **theme**, the **units** durations are shown in, and a **date
+format**. Embedded in the user (see [ADR-0007](../adr/0007-user-preferences.md)).
+
+**Units** — Whether a user sees durations in **days** or **hours** (an 8-hour
+working day). The engine always computes in days; units are presentation only.
+
+**Date format** — How calendar dates are rendered for a user (ISO, US, or EU).
+Takes effect once the calendar maps day-offsets to real dates.
+
+**Theme** — A user's colour preference: light, dark, or follow the system.
+
+**Currency** — The ISO 4217 currency an organization's monetary values are
+expressed in (code, symbol, name), set per organization. A display setting until
+cost rollups exist (see [ADR-0009](../adr/0009-currency.md)).
