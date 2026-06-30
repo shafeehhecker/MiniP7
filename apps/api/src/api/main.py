@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from schema import (
     Activity, Project, Organization, Role,
     SignupRequest, LoginRequest, AuthResponse,
+    UserPreferences, Currency, COMMON_CURRENCIES,
 )
 from persistence import SQLiteRepository
 from services import ProjectService, ServiceError, PermissionError_
@@ -30,7 +31,7 @@ service = ProjectService(SQLiteRepository(DB_PATH), token_secret=SECRET)
 
 app = FastAPI(
     title="Mini-P7 API",
-    version="0.3.0",
+    version="0.4.0",
     description="Multi-tenant CPM scheduler with self-hosted authentication.",
 )
 
@@ -76,6 +77,28 @@ def my_organizations(uid: str = Depends(current_user)):
 def add_member(org_id: str, user_id: str, role: Role = Role.MEMBER,
                uid: str = Depends(current_user)):
     return _guard(lambda: service.add_member(org_id, uid, user_id, role))
+
+
+@app.put("/api/organizations/{org_id}/currency", response_model=Organization, tags=["orgs"])
+def set_currency(org_id: str, body: Currency, uid: str = Depends(current_user)):
+    return _guard(lambda: service.set_organization_currency(org_id, uid, body))
+
+
+# ---- user preferences (authenticated; a user manages their own) ----
+@app.get("/api/me/preferences", response_model=UserPreferences, tags=["preferences"])
+def get_preferences(uid: str = Depends(current_user)):
+    return _guard(lambda: service.get_preferences(uid))
+
+
+@app.put("/api/me/preferences", response_model=UserPreferences, tags=["preferences"])
+def update_preferences(body: UserPreferences, uid: str = Depends(current_user)):
+    return _guard(lambda: service.update_preferences(uid, body))
+
+
+# ---- currency catalogue (public reference data) ----
+@app.get("/api/currencies", response_model=list[Currency], tags=["preferences"])
+def list_currencies():
+    return COMMON_CURRENCIES
 
 
 # ---- projects (authenticated + org-scoped) ----
