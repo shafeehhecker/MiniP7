@@ -86,3 +86,26 @@ def test_zero_duration_milestone():
     ])
     assert s.project_duration() == 3
     assert s.activities["M"].is_critical
+
+
+def test_milestone_type_schedules_as_zero_duration():
+    from schema import ActivityType
+    s = _run([
+        Activity(id="M", name="Kickoff", duration=0, type=ActivityType.MILESTONE),
+        Activity(id="T", name="Work", duration=4, predecessors=["M"]),
+    ])
+    m = s.activities["M"]
+    assert (m.ES, m.EF) == (0, 0)
+    assert s.get_milestones() == ["M"]
+    assert s.project_duration() == 4
+
+
+def test_level_of_effort_is_scheduled_not_rejected():
+    from schema import ActivityType
+    # LOE is accepted and scheduled like a task for now (see ADR-0008).
+    s = _run([
+        Activity(id="A", name="Build", duration=5),
+        Activity(id="PM", name="Manage", duration=5, predecessors=["A"],
+                 type=ActivityType.LEVEL_OF_EFFORT),
+    ])
+    assert s.activities["PM"].EF == 10
