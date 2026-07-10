@@ -25,3 +25,4 @@
 | [0007](0007-user-preferences.md) | User preferences embedded in the user | Accepted |
 | [0008](0008-activity-types.md) | Activity types (task / milestone / LOE / summary) | Accepted |
 | [0009](0009-currency.md) | Organization-level currency | Accepted |
+| [0010](0010-typescript-codegen-tooling.md) | Pure-Python TypeScript generator, committed output | Accepted |
