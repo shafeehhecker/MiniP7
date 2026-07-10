@@ -129,6 +129,10 @@ PYTHONPATH=packages/schema/src:packages/engine/src:packages/persistence/src:pack
   python -m pytest packages/schema/tests packages/engine/tests packages/services/tests packages/auth/tests
 ```
 
+CI (GitHub Actions) runs this suite on Python 3.11 and 3.12, enforces the
+dependency rule with import-linter, fails on schema→TypeScript drift, and
+builds + deploys the documentation site.
+
 Coverage includes the schema invariants (milestone duration, currency codes,
 preference defaults), the CPM math (floats, cycles, parallel paths), tenancy
 isolation (one org cannot see another's data), role permissions, and auth
