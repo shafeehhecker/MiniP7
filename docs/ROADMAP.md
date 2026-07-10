@@ -24,11 +24,17 @@ done, and a reusability contract — what downstream gets for free.
   `packages/client/src/models.ts`; CI fails on drift and type-checks the output
   with `tsc --strict` ([ADR-0010](adr/0010-typescript-codegen-tooling.md)).
 
-## Phase 2 — Core engine commons (`engine`)
+## Phase 2 — Core engine commons (`engine`) ✅
 - **Deliverable:** pure CPM extended for calendars and relationship types, plus EVM.
 - **Done when:** it passes property-based tests and runs identically in tests, the
   CLI, and batch jobs.
 - **Reuse:** the single source of scheduling truth for every interface.
+- **Status:** done. All four relationship types (FS/SS/FF/SF) with lag
+  ([ADR-0011](adr/0011-typed-relationships.md)), calendars mapping working days
+  to real dates ([ADR-0012](adr/0012-calendars.md)), earned value
+  ([ADR-0013](adr/0013-earned-value.md)), and level-of-effort spanning
+  (completing ADR-0008). Guarded by a Hypothesis property-based suite that
+  found and now permanently guards against a real float-hierarchy bug.
 
 ## Phase 3 — Services + persistence commons (`services`, `persistence`)
 - **Deliverable:** storage-agnostic repositories and the orchestration layer.
