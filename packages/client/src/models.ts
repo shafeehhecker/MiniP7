@@ -66,11 +66,18 @@ export interface Activity {
   /** Working days; 0 == milestone. */
   duration: number;
   type?: ActivityType;
+  /** Convenience form: predecessor ids, implying FS with 0 lag. */
   predecessors?: string[];
+  /** Typed dependencies (FS/SS/FF/SF with lag). Canonical form; kept in sync with `predecessors` (ADR-0011). */
+  relationships?: Relationship[];
   resource?: string | null;
   description?: string | null;
   status?: ActivityStatus;
   percent_complete?: number;
+  /** Budget at completion for this activity, in the organization's currency. */
+  budget?: number;
+  /** Actual cost incurred to date (ACWP contribution). */
+  actual_cost?: number;
   ES?: number;
   EF?: number;
   LS?: number;
@@ -87,12 +94,51 @@ export interface Relationship {
   lag?: number;
 }
 
+/** Working-time definition: which weekdays work, which dates don't. */
+export interface Calendar {
+  /** Weekdays that count as working days (0=Mon .. 6=Sun). */
+  working_days?: number[];
+  /** Specific dates that are non-working regardless of weekday. */
+  holidays?: string[];
+}
+
+/** Earned-value snapshot of a scheduled project as of a status day. */
+export interface EVMResult {
+  /** Status day, in working days from day 0. */
+  as_of_day: number;
+  /** Budget at completion: total budget. */
+  bac: number;
+  /** Planned value (BCWS): budgeted cost of work scheduled. */
+  pv: number;
+  /** Earned value (BCWP): budgeted cost of work performed. */
+  ev: number;
+  /** Actual cost (ACWP): money spent to date. */
+  ac: number;
+  /** Schedule variance: EV - PV (negative = behind). */
+  sv: number;
+  /** Cost variance: EV - AC (negative = over budget). */
+  cv: number;
+  /** Schedule performance index: EV / PV. */
+  spi: number | null;
+  /** Cost performance index: EV / AC. */
+  cpi: number | null;
+  /** Estimate at completion: BAC / CPI. */
+  eac: number | null;
+  /** Estimate to complete: EAC - AC. */
+  etc: number | null;
+  /** Variance at completion: BAC - EAC. */
+  vac: number | null;
+}
+
 /** A named container of activities, owned by exactly one organization. */
 export interface Project {
   id: string;
   organization_id: string;
   name?: string;
   activities?: Activity[];
+  /** The real date of working day 0. None = undated project. */
+  start_date?: string | null;
+  calendar?: Calendar;
 }
 
 /** A tenant: a company or team that owns projects and has members. */
