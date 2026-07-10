@@ -11,8 +11,9 @@ computed fields in place; they default to 0 / False until a schedule is run.
 """
 from __future__ import annotations
 
+from datetime import date
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -57,10 +58,22 @@ class ActivityType(str, Enum):
 
 
 class Relationship(BaseModel):
-    """A typed dependency from one activity to another, with optional lag."""
+    """A typed dependency from one activity to another, with optional lag.
+
+    ``lag`` is in working days and may be negative (a *lead*). The exact
+    scheduling semantics of each type are specified in ADR-0011 and explained
+    in docs/domain/cpm.md.
+    """
     predecessor_id: str
     type: RelationshipType = RelationshipType.FS
     lag: int = 0
+
+    @field_validator("predecessor_id")
+    @classmethod
+    def _pred_not_blank(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Relationship predecessor_id must not be blank.")
+        return v.strip()
 
 
 class Activity(BaseModel):
@@ -78,11 +91,25 @@ class Activity(BaseModel):
     name: str
     duration: int = Field(ge=0, description="Working days; 0 == milestone.")
     type: ActivityType = ActivityType.TASK
-    predecessors: List[str] = Field(default_factory=list)
+    predecessors: List[str] = Field(
+        default_factory=list,
+        description="Convenience form: predecessor ids, implying FS with 0 lag.")
+    relationships: List[Relationship] = Field(
+        default_factory=list,
+        description="Typed dependencies (FS/SS/FF/SF with lag). Canonical form; "
+                    "kept in sync with `predecessors` (ADR-0011).")
     resource: str | None = None
     description: str | None = None
     status: ActivityStatus = ActivityStatus.NOT_STARTED
     percent_complete: int = Field(default=0, ge=0, le=100)
+
+    # Cost fields (consumed by earned-value analysis, ADR-0013).
+    budget: float = Field(default=0, ge=0,
+                          description="Budget at completion for this activity, "
+                                      "in the organization's currency.")
+    actual_cost: float = Field(default=0, ge=0,
+                               description="Actual cost incurred to date (ACWP "
+                                           "contribution).")
 
     # Computed CPM fields (populated by the engine; 0 / False until scheduled).
     ES: int = 0
@@ -117,6 +144,32 @@ class Activity(BaseModel):
         return v
 
     @model_validator(mode="after")
+    def _sync_relationship_forms(self) -> "Activity":
+        """Keep the two dependency forms consistent (ADR-0011).
+
+        `relationships` is canonical. Any id given only in `predecessors`
+        becomes an implicit FS/0 relationship, so callers that predate typed
+        relationships keep working unchanged. Afterwards `predecessors` is
+        rebuilt as the ordered, de-duplicated ids of `relationships`, so the
+        two views can never disagree.
+        """
+        known = {r.predecessor_id for r in self.relationships}
+        for pid in self.predecessors:
+            if pid not in known:
+                self.relationships.append(Relationship(predecessor_id=pid))
+                known.add(pid)
+        seen: set[str] = set()
+        ids: List[str] = []
+        for r in self.relationships:
+            if r.predecessor_id == self.id:
+                raise ValueError(f"Activity '{self.id}' cannot depend on itself.")
+            if r.predecessor_id not in seen:
+                seen.add(r.predecessor_id)
+                ids.append(r.predecessor_id)
+        self.predecessors = ids
+        return self
+
+    @model_validator(mode="after")
     def _milestone_has_zero_duration(self) -> "Activity":
         # A milestone marks a point in time; it cannot consume working days.
         if self.type == ActivityType.MILESTONE and self.duration != 0:
@@ -132,6 +185,67 @@ class Activity(BaseModel):
         return (f"[{tag}] {self.id} | {self.name} | {self.type.value} | "
                 f"dur={self.duration} | pred=[{pred}] | ES={self.ES} EF={self.EF} "
                 f"LS={self.LS} LF={self.LF} | TF={self.total_float} FF={self.free_float}")
+
+
+# ---------------------------------------------------------------------------
+# Calendars (see ADR-0012)
+# ---------------------------------------------------------------------------
+# The engine always computes in abstract working days (day 0, day 1, ...).
+# A Calendar, together with a project start date, maps those offsets onto real
+# dates: which weekdays count as working days, and which specific dates are
+# holidays. The mapping lives in the engine (`engine.calendar`); the model here
+# only captures the choice.
+
+
+class Calendar(BaseModel):
+    """Working-time definition: which weekdays work, which dates don't.
+
+    ``working_days`` uses Python weekday numbers (0=Monday .. 6=Sunday); the
+    default is Monday-Friday. ``holidays`` are specific non-working dates and
+    win over ``working_days``.
+    """
+    working_days: List[int] = Field(
+        default_factory=lambda: [0, 1, 2, 3, 4],
+        description="Weekdays that count as working days (0=Mon .. 6=Sun).")
+    holidays: List[date] = Field(
+        default_factory=list,
+        description="Specific dates that are non-working regardless of weekday.")
+
+    @field_validator("working_days")
+    @classmethod
+    def _valid_weekdays(cls, v: List[int]) -> List[int]:
+        days = sorted(set(v))
+        if not days:
+            raise ValueError("A calendar needs at least one working day.")
+        if any(d < 0 or d > 6 for d in days):
+            raise ValueError("Weekdays must be 0 (Monday) .. 6 (Sunday).")
+        return days
+
+
+# ---------------------------------------------------------------------------
+# Earned value (see ADR-0013)
+# ---------------------------------------------------------------------------
+
+
+class EVMResult(BaseModel):
+    """Earned-value snapshot of a scheduled project as of a status day.
+
+    Computed by ``engine.evm.compute_evm``; all money values are in the
+    organization's currency. Ratios are ``None`` when their denominator is
+    zero (nothing planned yet / nothing spent yet) — never silently 0 or inf.
+    """
+    as_of_day: int = Field(description="Status day, in working days from day 0.")
+    bac: float = Field(description="Budget at completion: total budget.")
+    pv: float = Field(description="Planned value (BCWS): budgeted cost of work scheduled.")
+    ev: float = Field(description="Earned value (BCWP): budgeted cost of work performed.")
+    ac: float = Field(description="Actual cost (ACWP): money spent to date.")
+    sv: float = Field(description="Schedule variance: EV - PV (negative = behind).")
+    cv: float = Field(description="Cost variance: EV - AC (negative = over budget).")
+    spi: Optional[float] = Field(description="Schedule performance index: EV / PV.")
+    cpi: Optional[float] = Field(description="Cost performance index: EV / AC.")
+    eac: Optional[float] = Field(description="Estimate at completion: BAC / CPI.")
+    etc: Optional[float] = Field(description="Estimate to complete: EAC - AC.")
+    vac: Optional[float] = Field(description="Variance at completion: BAC - EAC.")
 
 
 # ---------------------------------------------------------------------------
@@ -292,8 +406,18 @@ class Organization(BaseModel):
 
 
 class Project(BaseModel):
-    """A named container of activities, owned by exactly one organization."""
+    """A named container of activities, owned by exactly one organization.
+
+    ``start_date`` anchors working day 0 to a real date; together with the
+    ``calendar`` it lets the UI show calendar dates while the engine keeps
+    computing in abstract working days (ADR-0012). Both are optional-with-
+    defaults so existing stored projects load unchanged.
+    """
     id: str
     organization_id: str
     name: str = "My Project"
     activities: List[Activity] = Field(default_factory=list)
+    start_date: date | None = Field(
+        default=None,
+        description="The real date of working day 0. None = undated project.")
+    calendar: Calendar = Field(default_factory=Calendar)
