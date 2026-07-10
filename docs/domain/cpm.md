@@ -95,3 +95,60 @@ translation differs. This is why the engine keeps scheduling and calendar mappin
 as separate, composable steps.
 EOF
 echo "cpm.md written"
+## Typed relationships and lag
+
+Everything above used the default relationship: **finish-to-start** — "B starts
+after A finishes". Real schedules need three more (see
+[ADR-0011](../adr/0011-typed-relationships.md) for the full semantics table):
+
+- **SS, start-to-start** — "paint starts 2 days after plastering starts":
+  `ES(B) ≥ ES(A) + 2`.
+- **FF, finish-to-finish** — "commissioning finishes when installation
+  finishes": `EF(B) ≥ EF(A)`.
+- **SF, start-to-finish** — rare: the predecessor's *start* releases the
+  successor's *finish* (classic example: the old shift may only end once the
+  new shift has started).
+
+A **lag** delays the constraint; a **negative lag** (a *lead*) overlaps it:
+FS with lag −2 lets B begin during A's final two days.
+
+### Worked example
+
+A is 5 days. B (3 days) may start 2 days after A starts — SS with lag 2.
+
+- Forward: `ES(B) = ES(A) + 2 = 2`, `EF(B) = 5`. Project finish: **5**.
+- Backward: B is terminal, so `LF(B) = 5`, `LS(B) = 2`. A's start constrains
+  B's start, so `LS(A) ≤ LS(B) − 2 = 0` — A cannot slip at all.
+
+Both activities are critical, and note *why* A is critical: not because its
+finish drives anything, but because its **start** does. Start-driven
+criticality only exists once SS/SF relationships do; FS-only intuition says
+"critical = my finish matters", which is no longer the whole story.
+
+### The float hierarchy survived a real bug
+
+Free float must never exceed total float. The Hypothesis property suite found
+a network — a zero-duration activity with an FS *lead* into a successor
+clamped at day 0 — where the naive per-relationship slack broke that
+hierarchy. The fix (free float is also bounded by the slack to the project
+finish, for every activity) is recorded in ADR-0011, and the property test
+that caught it now guards the invariant permanently. This is exactly the
+role of the property suite: it is the engine's specification, expressed as
+invariants no network may violate.
+
+## From working days to dates
+
+The passes above never mention a date — deliberately
+([ADR-0012](../adr/0012-calendars.md)). A project `start_date` plus a
+`Calendar` (working weekdays and holidays) map working-day offsets to real
+dates at the edge: day 0 is the first working date on or after the start,
+an activity's finish date is the date of day `EF − 1`, and a milestone
+occurs at day `ES`. The maths stays pure integers; the dates are a view.
+
+## Measuring progress: earned value
+
+Once activities carry a `budget`, `percent_complete` and `actual_cost`, the
+engine can answer "are we on plan?" quantitatively — planned value, earned
+value, actual cost, and the SPI/CPI indices and EAC forecast derived from
+them. The definitions live in the [glossary](glossary.md) and the decisions
+in [ADR-0013](../adr/0013-earned-value.md).

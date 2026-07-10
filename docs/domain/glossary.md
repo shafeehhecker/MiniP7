@@ -13,8 +13,9 @@ schedule.
 **task** (ordinary work with a duration), **milestone** (a zero-duration marker
 for a point in time), **level of effort** (sustained work whose span is driven by
 other activities), and **summary** (a roll-up of the activities beneath a WBS
-node). Task and milestone are fully scheduled today; level-of-effort and summary
-are modelled and scheduled as tasks until typed relationships and the WBS land
+node). Task, milestone and level-of-effort are fully scheduled today (an LOE spans
+the activities it supports — see [ADR-0011](../adr/0011-typed-relationships.md));
+summary is modelled and scheduled as a task until the WBS lands
 (see [ADR-0008](../adr/0008-activity-types.md)).
 
 **Milestone** — A zero-duration activity marking a point in time, such as a
@@ -52,7 +53,9 @@ finish without delaying the project, computed in the backward pass.
 project. `TF = LS − ES`.
 
 **Free float (FF)** — How long an activity can slip without delaying *any* of its
-successors. `FF = min(successor ES) − EF`.
+successors or the project finish: the tightest relationship slack toward any
+successor, bounded by `project finish − EF`. Always `FF ≤ TF`
+(see [ADR-0011](../adr/0011-typed-relationships.md)).
 
 **Critical path** — The longest path through the network; the chain of activities
 with zero total float. Delaying any of them delays the whole project.
@@ -124,3 +127,36 @@ Takes effect once the calendar maps day-offsets to real dates.
 **Currency** — The ISO 4217 currency an organization's monetary values are
 expressed in (code, symbol, name), set per organization. A display setting until
 cost rollups exist (see [ADR-0009](../adr/0009-currency.md)).
+
+## Calendars (see [ADR-0012](../adr/0012-calendars.md))
+
+**Calendar** — The working-time definition: which weekdays count as working
+days plus specific holiday dates. The engine always computes in working days;
+a calendar and a project start date map those offsets onto real dates.
+
+**Working day 0** — The first working date on or after the project start date.
+An activity occupies working days `ES..EF−1`; a milestone occurs at day `ES`.
+
+## Earned value (see [ADR-0013](../adr/0013-earned-value.md))
+
+**BAC — Budget at completion** — The total budget: the sum of every activity's
+budget.
+
+**PV / BCWS — Planned value** — The budget that *should* have been consumed by
+the status day, accruing linearly across each activity's scheduled span.
+
+**EV / BCWP — Earned value** — The budgeted worth of work actually performed:
+`budget × percent complete` per activity.
+
+**AC / ACWP — Actual cost** — Money actually spent to date.
+
+**SV / CV — Schedule / cost variance** — `SV = EV − PV` (negative = behind
+schedule); `CV = EV − AC` (negative = over budget).
+
+**SPI / CPI — Schedule / cost performance index** — `SPI = EV ÷ PV`,
+`CPI = EV ÷ AC`. `None` when the denominator is zero — "no data yet" is never
+"exactly on plan".
+
+**EAC / ETC / VAC** — Forecasts assuming current cost performance continues:
+estimate at completion `EAC = BAC ÷ CPI`, estimate to complete
+`ETC = EAC − AC`, variance at completion `VAC = BAC − EAC`.
