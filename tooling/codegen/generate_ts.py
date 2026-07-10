@@ -23,6 +23,7 @@ Design notes
 from __future__ import annotations
 
 import argparse
+import datetime
 import enum
 import sys
 import types
@@ -56,6 +57,7 @@ PRIMITIVES = {
     int: "number",
     float: "number",
     bool: "boolean",
+    datetime.date: "string",  # ISO 8601 date on the wire (e.g. "2026-07-10")
 }
 
 
