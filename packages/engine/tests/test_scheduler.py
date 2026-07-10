@@ -102,10 +102,13 @@ def test_milestone_type_schedules_as_zero_duration():
 
 def test_level_of_effort_is_scheduled_not_rejected():
     from schema import ActivityType
-    # LOE is accepted and scheduled like a task for now (see ADR-0008).
+    # ADR-0008 deferred LOE behaviour until typed relationships landed; they
+    # have (ADR-0011), so an LOE now *spans* the work it supports rather than
+    # scheduling as a task after it.
     s = _run([
         Activity(id="A", name="Build", duration=5),
         Activity(id="PM", name="Manage", duration=5, predecessors=["A"],
                  type=ActivityType.LEVEL_OF_EFFORT),
     ])
-    assert s.activities["PM"].EF == 10
+    assert (s.activities["PM"].ES, s.activities["PM"].EF) == (0, 5)
+    assert not s.activities["PM"].is_critical
