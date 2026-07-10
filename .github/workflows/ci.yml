@@ -26,11 +26,16 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
       - run: pip install -r requirements.txt
-      - run: python -m pytest -q
+      - run: >
+          python -m pytest -q
+          packages/schema/tests packages/engine/tests
+          packages/services/tests packages/auth/tests
 
   architecture:
     name: Dependency rule (ADR-0002)
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: packages/schema/src:packages/engine/src:packages/persistence/src:packages/services/src:packages/auth/src
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -41,6 +46,8 @@ jobs:
   codegen:
     name: Schema → TypeScript drift (ADR-0003)
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: packages/schema/src:packages/engine/src:packages/persistence/src:packages/services/src:packages/auth/src
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
