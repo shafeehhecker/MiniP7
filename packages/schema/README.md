@@ -16,6 +16,11 @@ so Python and TypeScript can never disagree about the model (see
 `experimental` — the model is still expanding (relationship types, costs, EVM
 fields). Breaking changes are expected until `1.0.0`.
 
+The TypeScript generation pipeline is **built**: `tooling/codegen/generate_ts.py`
+emits `packages/client/src/models.ts` from this package's public API, and CI
+fails on drift (see [ADR-0010](../../docs/adr/0010-typescript-codegen-tooling.md)
+and the [how-to guide](../../docs/guides/regenerating-types.md)).
+
 ## Public API
 
 - `Activity` — a unit of work with duration, predecessors, a `type`
@@ -51,8 +56,8 @@ None. This is the root of the dependency graph.
 ```python
 from schema import Activity
 
-a = Activity("A", "Start", duration=2, predecessors=())
-print(a.to_dict())
+a = Activity(id="A", name="Start", duration=2)
+print(a.model_dump_json())
 ```
 
 ## Testing
