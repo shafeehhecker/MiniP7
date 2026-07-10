@@ -23,12 +23,20 @@ and the [how-to guide](../../docs/guides/regenerating-types.md)).
 
 ## Public API
 
-- `Activity` — a unit of work with duration, predecessors, a `type`
-  (`ActivityType`), and computed CPM fields.
+- `Activity` — a unit of work with duration, dependencies (both the simple
+  `predecessors` id list and canonical typed `relationships`, kept in sync —
+  see [ADR-0011](../../docs/adr/0011-typed-relationships.md)), a `type`
+  (`ActivityType`), cost fields (`budget`, `actual_cost`), and computed CPM
+  fields.
 - `ActivityType` — `task | milestone | level_of_effort | summary`
   (see [ADR-0008](../../docs/adr/0008-activity-types.md)).
-- `ActivityStatus`, `Relationship`, `RelationshipType` — status and (modelled)
-  typed dependencies.
+- `ActivityStatus`, `Relationship`, `RelationshipType` — status and typed
+  dependencies (FS/SS/FF/SF with lag; negative lag is a lead).
+- `Calendar` — working weekdays plus holidays; with `Project.start_date` it
+  maps working days to real dates (see
+  [ADR-0012](../../docs/adr/0012-calendars.md)).
+- `EVMResult` — an earned-value snapshot computed by the engine (see
+  [ADR-0013](../../docs/adr/0013-earned-value.md)).
 - `Project`, `Organization`, `Membership`, `Role` — multi-tenant containers and
   roles.
 - `User`, `UserPreferences`, `UnitSystem`, `DateFormat`, `Theme` — identity plus
@@ -36,7 +44,7 @@ and the [how-to guide](../../docs/guides/regenerating-types.md)).
 - `Currency`, `COMMON_CURRENCIES` — organization currency value object and a
   starter catalogue (see [ADR-0009](../../docs/adr/0009-currency.md)).
 - `SignupRequest`, `LoginRequest`, `AuthResponse` — auth payloads.
-- (planned) `WBSNode`, `Resource`, `Assignment`, `Calendar`, `Baseline`.
+- (planned) `WBSNode`, `Resource`, `Assignment`, `Baseline`.
 
 ## Invariants
 
