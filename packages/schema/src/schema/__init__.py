@@ -4,6 +4,8 @@ from .models import (  # noqa: F401
     ActivityStatus,
     Relationship,
     RelationshipType,
+    Calendar,
+    EVMResult,
     Project,
     Organization,
     User,
@@ -22,7 +24,7 @@ from .models import (  # noqa: F401
 
 __all__ = [
     "Activity", "ActivityType", "ActivityStatus",
-    "Relationship", "RelationshipType", "Project",
+    "Relationship", "RelationshipType", "Calendar", "EVMResult", "Project",
     "Organization", "User", "UserPreferences", "UnitSystem", "DateFormat", "Theme",
     "Role", "Membership", "Currency", "COMMON_CURRENCIES",
     "SignupRequest", "LoginRequest", "AuthResponse",
