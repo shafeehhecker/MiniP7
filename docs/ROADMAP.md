@@ -7,16 +7,22 @@
 Each phase has an objective, a single deliverable (the commons), a definition of
 done, and a reusability contract — what downstream gets for free.
 
-## Phase 0 — Repository & toolchain commons
+## Phase 0 — Repository & toolchain commons ✅
 - **Deliverable:** the monorepo, CI, shared configs, commit conventions, ADR process.
 - **Done when:** a trivial package can be added, tested, and released through CI.
 - **Reuse:** every later package inherits CI, versioning, and conventions.
+- **Status:** done. `.github/workflows/ci.yml` runs the test suites (3.11/3.12),
+  enforces the dependency rule with import-linter, gates schema→TypeScript
+  drift, and builds + deploys the docs site strictly.
 
-## Phase 1 — Domain schema commons (`schema`)
+## Phase 1 — Domain schema commons (`schema`) ✅
 - **Deliverable:** the canonical model in Pydantic, generating TypeScript types.
 - **Done when:** a model change regenerates both languages in one command and CI
   fails on drift.
 - **Reuse:** every package and both languages share one definition.
+- **Status:** done. `python tooling/codegen/generate_ts.py` regenerates
+  `packages/client/src/models.ts`; CI fails on drift and type-checks the output
+  with `tsc --strict` ([ADR-0010](adr/0010-typescript-codegen-tooling.md)).
 
 ## Phase 2 — Core engine commons (`engine`)
 - **Deliverable:** pure CPM extended for calendars and relationship types, plus EVM.
