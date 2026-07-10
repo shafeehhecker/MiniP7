@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MiniP7"
+version = "0.1.0"
+description = "Critical path scheduling engine for small teams"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "packages/schema/src",
+    "packages/engine/src",
+    "packages/persistence/src",
+    "packages/services/src",
+    "packages/auth/src",
+]
+testpaths = [
+    "packages/schema/tests",
+    "packages/engine/tests",
+    "packages/services/tests",
+    "packages/auth/tests",
+]
