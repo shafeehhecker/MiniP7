@@ -26,3 +26,6 @@
 | [0008](0008-activity-types.md) | Activity types (task / milestone / LOE / summary) | Accepted |
 | [0009](0009-currency.md) | Organization-level currency | Accepted |
 | [0010](0010-typescript-codegen-tooling.md) | Pure-Python TypeScript generator, committed output | Accepted |
+| [0011](0011-typed-relationships.md) | Typed relationships (FS/SS/FF/SF) with lag | Accepted |
+| [0012](0012-calendars.md) | Calendars — the engine stays in working days | Accepted |
+| [0013](0013-earned-value.md) | Earned value — linear PV, percent-complete EV | Accepted |
