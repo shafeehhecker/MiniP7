@@ -5,8 +5,8 @@ clean Critical Path Method engine, a disciplined *commons* architecture, and
 documentation treated as a first-class product.
 
 Plan a project, break it into tasks, declare which task depends on which, and
-instantly see how long the whole thing takes and which tasks are critical — the
-ones that can't slip without delaying everything. .
+instantly see how long the whole thing takes and which tasks are critical - the
+ones that can't slip without delaying everything. 
 
 ---
 
