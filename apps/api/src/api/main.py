@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from schema import (
     Activity, Project, Organization, Role,
     SignupRequest, LoginRequest, AuthResponse,
-    UserPreferences, Currency, COMMON_CURRENCIES,
+    UserPreferences, Currency, COMMON_CURRENCIES, EVMResult,
 )
 from persistence import SQLiteRepository
 from services import ProjectService, ServiceError, PermissionError_
@@ -148,6 +148,13 @@ def delete_activity(org_id: str, project_id: str, activity_id: str,
 @app.post("/api/organizations/{org_id}/projects/{project_id}/schedule", tags=["scheduling"])
 def schedule(org_id: str, project_id: str, uid: str = Depends(current_user)):
     return _guard(lambda: service.schedule(org_id, uid, project_id))
+
+
+@app.get("/api/organizations/{org_id}/projects/{project_id}/evm",
+         response_model=EVMResult, tags=["scheduling"])
+def evm(org_id: str, project_id: str, as_of_day: int,
+        uid: str = Depends(current_user)):
+    return _guard(lambda: service.evm(org_id, uid, project_id, as_of_day))
 
 
 # ---- serve the UI ----
