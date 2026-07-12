@@ -1,10 +1,11 @@
 # CI — makes the repository's promises true (Phase 0).
 #
-# Four gates, mirroring the roadmap's "done when" criteria:
+# Five gates, mirroring the roadmap's "done when" criteria:
 #   1. tests        — every package's suite passes (3.11 and 3.12)
 #   2. architecture — the inward dependency rule holds (ADR-0002)
 #   3. codegen      — the TypeScript types match the Pydantic schema (ADR-0003)
-#   4. docs         — the documentation site builds strictly; deployed on main
+#   4. frontend     — apps/web type-checks and builds against @minip7/client (ADR-0014)
+#   5. docs         — the documentation site builds strictly; deployed on main
 name: CI
 
 on:
@@ -59,6 +60,19 @@ jobs:
       - run: python tooling/codegen/generate_ts.py --check
       # Gate 2: the generated TypeScript compiles under strict mode.
       - run: npx --yes --package typescript@5 tsc --noEmit --strict packages/client/src/models.ts
+
+  frontend:
+    name: Frontend build (ADR-0014)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "24", cache: npm }
+      # Installs both packages/client and apps/web via the root workspace,
+      # so @minip7/client resolves to the real generated types (ADR-0014
+      # Decision 2) — not a hand-copied stand-in that could silently drift.
+      - run: npm install
+      - run: npm run build --workspace apps/web
 
   docs:
     name: Docs build (strict) + deploy
