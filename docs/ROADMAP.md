@@ -46,18 +46,29 @@ done, and a reusability contract — what downstream gets for free.
 - **Done when:** a breaking API change fails the frontend build at compile time.
 - **Reuse:** the frontend never hand-writes a fetch call or a response type.
 
-## Phase 5 — UI commons (`ui`)
+## Phase 5 — UI commons (`ui`) ✅ (first cut)
 - **Deliverable:** design tokens, primitives, wrapped Gantt + data grid, data hooks.
 - **Done when:** a new view is assembled from primitives with zero raw styling.
 - **Reuse:** every feature vertical is composition, not construction.
+- **Status:** the React migration mentioned below as "an option" has happened.
+  `apps/web` (React + TypeScript + Tailwind + Vite) now covers auth, project
+  and activity CRUD, scheduling, an interactive Gantt drawing all four
+  relationship types, and earned value — built from a small primitive set
+  (`Button`/`Input`/`Select`/`Modal`/`Card`/`Table`/`Badge`/`Alert`) under a
+  drafting-table design system ([ADR-0014](adr/0014-frontend-stack.md)). It
+  consumes `packages/client` as a real npm-workspace dependency, so the
+  frontend/backend type contract has the same drift protection as the rest of
+  the commons. Deferred to Phase 6: drag-to-reschedule, calendar dates on the
+  Gantt (the engine supports them — ADR-0012 — the endpoint doesn't expose
+  them yet), baseline overlay, zoom, export. The zero-build static UI in
+  `apps/api/static` remains in place as a lightweight fallback.
 
-## Built since: core-job web UI
+## Built since: core-job web UI (superseded above)
 
-A zero-build web app (served by the API) now provides the core job end to end:
+A zero-build web app (served by the API) provided the core job end to end:
 sign up / log in, a projects list, create projects, add / edit / delete tasks
 through a form, run the schedule, and an interactive Gantt with dependency
-arrows. A React migration remains an option if the component ecosystem is
-needed later; the zero-build approach avoids a Node toolchain for now.
+arrows. It remains available but Phase 5's React app is now the primary UI.
 
 ## Built since: activity types, preferences, currency
 
