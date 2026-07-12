@@ -1,0 +1,9 @@
+{
+  "name": "minip7",
+  "private": true,
+  "description": "Workspace root — ties the generated TypeScript commons (packages/client) to the consumer apps (apps/web). Python packages are managed separately via pip; this workspace exists only for the JS/TS side of the dependency graph (ADR-0014).",
+  "workspaces": [
+    "packages/client",
+    "apps/web"
+  ]
+}
