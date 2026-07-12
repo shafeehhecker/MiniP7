@@ -8,6 +8,8 @@ venv/
 *.sqlite3
 node_modules/
 dist/
+*.tsbuildinfo
+.hypothesis/
 .env
 .env.*
 .DS_Store
