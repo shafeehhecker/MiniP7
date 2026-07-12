@@ -15,8 +15,8 @@ phase and must obey the [dependency rule](ARCHITECTURE.md#the-dependency-rule).
 | [`auth`](../../packages/auth/README.md) | M1 | Python | **built** | — | Password hashing + JWT (self-hosted) |
 | `persistence` | 3 | Python | **built** | `schema` | Storage-agnostic repositories |
 | `services` | 3 | Python | **built** | `engine`, `persistence` | Orchestration / use-cases |
-| `client` | 4 | TypeScript | in progress | `schema` | Generated types **built** (from schema, CI-checked); runtime API client planned |
-| `ui` | 5 | TypeScript | planned | `client`, `schema` | Design system + Gantt/grid + data hooks |
+| `client` | 4 | TypeScript | in progress | `schema` | Generated types **built** (from schema, CI-checked) and now consumed by `apps/web` as a real workspace dependency; runtime API client wrapper still planned |
+| `ui` | 5 | TypeScript | **deferred (YAGNI)** | `client`, `schema` | Design system built, but lives in `apps/web/src/components` — extracted here once a second consumer needs it; see [`packages/ui/README.md`](../../packages/ui/README.md) |
 
 ## Rules that keep the registry honest
 
