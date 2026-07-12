@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper-line: #c7d2e0;
+}
+
+/* Blueprint grid backdrop for the main canvas — the page reads like graph
+   paper, grounding the tool in the drafting-table world CPM comes from. */
+.bg-blueprint-grid {
+  background-color: theme("colors.paper");
+  background-image: theme("backgroundImage.blueprint");
+  background-size: theme("backgroundSize.grid");
+}
+
+/* Visible keyboard focus everywhere — quality floor, not decoration. */
+:focus-visible {
+  outline: 2px solid theme("colors.ink");
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
