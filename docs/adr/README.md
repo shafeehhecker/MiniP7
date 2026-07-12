@@ -29,3 +29,4 @@
 | [0011](0011-typed-relationships.md) | Typed relationships (FS/SS/FF/SF) with lag | Accepted |
 | [0012](0012-calendars.md) | Calendars — the engine stays in working days | Accepted |
 | [0013](0013-earned-value.md) | Earned value — linear PV, percent-complete EV | Accepted |
+| [0014](0014-frontend-stack.md) | Frontend stack, commons workspace, drafting-table design | Accepted |
