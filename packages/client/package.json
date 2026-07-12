@@ -1,0 +1,9 @@
+{
+  "name": "@minip7/client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript types generated from packages/schema (ADR-0003). Never edit src/models.ts by hand — regenerate with `python tooling/codegen/generate_ts.py`. A runtime fetch client is planned; today this package is types-only.",
+  "types": "src/models.ts",
+  "main": "src/models.ts",
+  "sideEffects": false
+}
