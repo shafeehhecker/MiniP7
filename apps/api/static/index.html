@@ -72,6 +72,15 @@
   .modal input:focus, .modal select:focus { outline:none; border-color:var(--accent); }
   .modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 70px; gap:10px; }
+  .rel-list { margin:6px 0; }
+  .rel-row { display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--line); border-radius:6px; padding:4px 8px; margin-bottom:4px; font-size:12px; }
+  .rel-row button { padding:1px 6px; font-size:11px; }
+  .evm-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px 10px; }
+  .evm-grid .m-label { color:var(--muted); font-size:11px; text-transform:uppercase; }
+  .evm-grid .m-value { font-size:16px; font-weight:600; margin-top:2px; }
+  .evm-grid .m-value.warn { color:var(--crit); }
   .hint { color:var(--muted); font-size:12px; margin-top:4px; }
 </style>
 </head>
@@ -105,9 +114,27 @@
       <option value="level_of_effort">Level of effort</option>
       <option value="summary">Summary</option>
     </select>
-    <label>Predecessors (comma-separated IDs)</label><input id="m-pred" placeholder="A, B" />
-    <div class="hint">Leave blank if this task has no dependencies.</div>
+    <label>Predecessors</label>
+    <div class="rel-list" id="rel-list"></div>
+    <div class="grid3">
+      <select id="rel-pred"></select>
+      <select id="rel-type">
+        <option value="FS">FS — finish → start</option>
+        <option value="SS">SS — start → start</option>
+        <option value="FF">FF — finish → finish</option>
+        <option value="SF">SF — start → finish</option>
+      </select>
+      <input id="rel-lag" type="number" placeholder="Lag" value="0" />
+    </div>
+    <button type="button" onclick="addRelationship()">+ Add predecessor</button>
+    <div class="hint">Lag is in working days; negative lag is a lead (overlap).</div>
     <label>Resource (optional)</label><input id="m-res" placeholder="Electrical Team" />
+    <label>Cost &amp; progress</label>
+    <div class="grid3">
+      <input id="m-budget" type="number" min="0" placeholder="Budget" value="0" />
+      <input id="m-actual" type="number" min="0" placeholder="Actual cost" value="0" />
+      <input id="m-pct" type="number" min="0" max="100" placeholder="% complete" value="0" />
+    </div>
     <div class="actions">
       <button onclick="closeModal()">Cancel</button>
       <button class="primary" onclick="saveActivity()">Save task</button>
@@ -157,6 +184,9 @@ document.getElementById("email").textContent = EMAIL;
 let currentProject = null, editingId = null;
 let prefs = { units:"days", date_format:"iso", theme:"system" };
 let currencies = [];
+let currentActs = [];       // last-rendered activities, for the predecessor picker
+let modalRelationships = []; // relationships being built in the open modal
+let orgCurrency = { code:"USD", symbol:"$" };
 
 async function api(method, path, body) {
   const opts = { method, headers: { "Content-Type":"application/json", "Authorization":"Bearer "+TOKEN } };
@@ -181,6 +211,13 @@ mql.addEventListener("change", () => { if (prefs.theme === "system") applyTheme(
 function fmtDur(days){
   if (prefs.units === "hours") { const h = days*8; return h + (h===1?" hr":" hrs"); }
   return days + (days===1?" day":" days");
+}
+function fmtMoney(n){
+  return orgCurrency.symbol + Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
+}
+async function loadOrgCurrency(){
+  try { const orgs = await api("GET","/api/organizations");
+    const o = orgs.find(o=>o.id===ORG); if (o && o.currency) orgCurrency = o.currency; } catch(e){}
 }
 async function loadPrefs(){
   try { prefs = await api("GET","/api/me/preferences"); } catch(e){ /* keep defaults */ }
@@ -258,6 +295,7 @@ async function renderProject(data){
   const proj = await api("GET", `${base()}/${currentProject}`);
   document.getElementById("crumb").textContent = "Projects › " + proj.name;
   const acts = data.activities || proj.activities;
+  currentActs = acts;
   const scheduled = (data.duration||0) > 0;
   document.getElementById("view").innerHTML = `
     <div class="kpis">
@@ -269,9 +307,20 @@ async function renderProject(data){
       <button onclick="loadSample()">Load sample</button>
       <button class="primary" onclick="openModal()">+ Add task</button>
       <button class="primary" onclick="reschedule()">▶ Schedule</button></div>
-      <div id="task-table"></div></div>
+      <div id="task-table" style="overflow-x:auto"></div></div>
     <div class="card"><div class="card-head"><h2>Gantt</h2></div>
-      <div class="gantt" id="gantt"></div></div>`;
+      <div class="gantt" id="gantt"></div></div>
+    <div class="card"><div class="card-head"><h2>Earned value</h2><span class="spacer"></span>
+      ${scheduled ? `
+        <label style="margin:0 8px 0 0;font-size:12px;color:var(--muted)">As of day</label>
+        <input id="evm-day" type="number" min="0" value="${Math.max(1,Math.floor((data.duration||1)/2))}"
+          style="width:70px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)" />
+        <button class="primary" onclick="loadEvm()">Compute</button>` : ""}
+      </div>
+      <div id="evm-body" style="padding:14px 18px">
+        ${scheduled ? `<div class="empty">Pick a status day and click Compute.</div>`
+                    : `<div class="empty">Schedule the project first.</div>`}
+      </div></div>`;
   renderTable(acts, scheduled);
   renderGantt(acts, data.duration||0);
 }
@@ -280,16 +329,27 @@ function typeCell(a){
   if (a.type && a.type !== "task") return `<span class="pill type">${a.type.replace(/_/g," ")}</span>`;
   return `<span class="pill type">task</span>`;
 }
+function predCell(a){
+  const rels = a.relationships || [];
+  if (!rels.length) return "—";
+  return rels.map(r=>{
+    let s = r.predecessor_id;
+    if (r.type && r.type !== "FS") s += "·" + r.type;
+    if (r.lag) s += (r.lag>0?"+":"") + r.lag + "d";
+    return s;
+  }).join(", ");
+}
 function renderTable(acts, scheduled){
   const el=document.getElementById("task-table");
   if(!acts.length){ el.innerHTML=`<div class="empty">No tasks yet. Add one, or load the sample.</div>`; return; }
   let html=`<table><thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Dur</th><th>Pred</th><th>Res</th>
-    <th>ES</th><th>EF</th><th>Float</th><th></th><th></th></tr></thead><tbody>`;
+    <th>Budget</th><th>Actual</th><th>ES</th><th>EF</th><th>Float</th><th></th><th></th></tr></thead><tbody>`;
   for(const a of acts){
     const pill=scheduled?(a.is_critical?'<span class="pill crit">critical</span>':`<span class="pill float">${a.total_float}d float</span>`):"";
     html+=`<tr class="${a.is_critical&&scheduled?"crit":""}">
       <td>${a.id}</td><td>${escapeHtml(a.name)}</td><td>${typeCell(a)}</td><td>${fmtDur(a.duration)}</td>
-      <td>${(a.predecessors||[]).join(",")||"—"}</td><td>${escapeHtml(a.resource||"—")}</td>
+      <td>${predCell(a)}</td><td>${escapeHtml(a.resource||"—")}</td>
+      <td>${a.budget?fmtMoney(a.budget):"—"}</td><td>${a.actual_cost?fmtMoney(a.actual_cost):"—"}</td>
       <td>${scheduled?a.ES:"—"}</td><td>${scheduled?a.EF:"—"}</td><td>${scheduled?pill:"—"}</td>
       <td class="rowact"><button onclick='editActivity(${JSON.stringify(JSON.stringify(a))})'>Edit</button></td>
       <td class="rowact"><button class="danger" onclick="deleteActivity('${a.id}')">Delete</button></td></tr>`;
@@ -313,12 +373,22 @@ function renderGantt(acts, total){
       rows+=`<rect x="${x}" y="${y}" width="${w}" height="${barH}" rx="3" fill="${color}"></rect>
              <text x="${x+4}" y="${y+barH-4}" font-size="11" fill="#fff">${a.id}</text>`;
     }
-    (a.predecessors||[]).forEach(pid=>{
+    (a.relationships||[]).forEach(r=>{
+      const pid=r.predecessor_id;
       if(pos[pid]===undefined) return;
       const pa=acts[pos[pid]];
-      const fx=pa.EF*scale, fy=pos[pid]*rowH+padY+barH/2, tx=a.ES*scale, ty=y+barH/2;
-      arrows+=`<path d="M${fx},${fy} C${fx+14},${fy} ${tx-14},${ty} ${tx},${ty}" fill="none" stroke="#9a9a93" stroke-width="1.3"></path>
-               <path d="M${tx},${ty} l-5,-3 l0,6 z" fill="#9a9a93"></path>`;
+      // Endpoint depends on relationship type (ADR-0011): FS/SS anchor on the
+      // start of the successor's side, FF/SF on the finish side; the "from"
+      // point mirrors whichever side of the predecessor the type reads from.
+      let fx, tx;
+      if (r.type === "SS")      { fx=pa.ES*scale; tx=a.ES*scale; }
+      else if (r.type === "FF") { fx=pa.EF*scale; tx=a.EF*scale; }
+      else if (r.type === "SF") { fx=pa.ES*scale; tx=a.EF*scale; }
+      else                      { fx=pa.EF*scale; tx=a.ES*scale; } // FS, default
+      const fy=pos[pid]*rowH+padY+barH/2, ty=y+barH/2;
+      const lineColor = r.type === "SF" ? "#c0392b" : "#9a9a93";
+      arrows+=`<path d="M${fx},${fy} C${fx+14},${fy} ${tx-14},${ty} ${tx},${ty}" fill="none" stroke="${lineColor}" stroke-width="1.3"></path>
+               <path d="M${tx},${ty} l-5,-3 l0,6 z" fill="${lineColor}"></path>`;
     });
   });
   const H=acts.length*rowH+padY;
@@ -326,27 +396,92 @@ function renderGantt(acts, total){
   el.innerHTML=`<div style="display:flex"><div style="flex-shrink:0">${labels}</div>
     <div style="flex:1"><svg class="bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">${arrows}${rows}</svg></div></div>
     <div style="margin-top:8px;font-size:12px;color:var(--muted)"><span style="color:#c0392b">■</span> critical &nbsp;
-    <span style="color:#185fa5">■</span> has float &nbsp; ◆ milestone &nbsp; arrows = dependencies</div>`;
+    <span style="color:#185fa5">■</span> has float &nbsp; ◆ milestone &nbsp;
+    <span style="color:#9a9a93">→</span> FS/SS/FF &nbsp; <span style="color:#c0392b">→</span> SF (uncommon, verify)</div>`;
 }
 async function reschedule(){ try{ renderProject(await api("POST", `${base()}/${currentProject}/schedule`)); }catch(e){ showErr(e.message);} }
 async function loadSample(){ try{ await api("POST", `${base()}/${currentProject}/sample`); reschedule(); }catch(e){ showErr(e.message);} }
+
+// ---- earned value (ADR-0013) ----
+async function loadEvm(){
+  const day = parseInt(document.getElementById("evm-day").value,10)||0;
+  const body = document.getElementById("evm-body");
+  body.innerHTML = `<div class="empty">Computing…</div>`;
+  try {
+    const r = await api("GET", `${base()}/${currentProject}/evm?as_of_day=${day}`);
+    body.innerHTML = renderEvmGrid(r);
+  } catch(e){ body.innerHTML = `<div class="empty">${escapeHtml(e.message)}</div>`; }
+}
+function renderEvmGrid(r){
+  const ratio = v => (v===null||v===undefined) ? "—" : v.toFixed(2);
+  const money = v => (v===null||v===undefined) ? "—" : fmtMoney(v);
+  const cell = (label,val,warn) => `<div><div class="m-label">${label}</div>
+    <div class="m-value${warn?" warn":""}">${val}</div></div>`;
+  return `<div class="evm-grid">
+    ${cell("BAC", money(r.bac))}
+    ${cell("PV", money(r.pv))}
+    ${cell("EV", money(r.ev))}
+    ${cell("AC", money(r.ac))}
+    ${cell("SV", money(r.sv), r.sv<0)}
+    ${cell("CV", money(r.cv), r.cv<0)}
+    ${cell("SPI", ratio(r.spi), r.spi!==null && r.spi<1)}
+    ${cell("CPI", ratio(r.cpi), r.cpi!==null && r.cpi<1)}
+    ${cell("EAC", money(r.eac))}
+    ${cell("VAC", money(r.vac), r.vac!==null && r.vac<0)}
+  </div>`;
+}
+
+// ---- typed relationships (ADR-0011) ----
+function populateRelPredOptions(excludeId){
+  const sel = document.getElementById("rel-pred");
+  const opts = currentActs.filter(a=>a.id!==excludeId)
+    .map(a=>`<option value="${a.id}">${a.id} — ${escapeHtml(a.name)}</option>`).join("");
+  sel.innerHTML = `<option value="">Predecessor…</option>` + opts;
+}
+function addRelationship(){
+  const pred = document.getElementById("rel-pred").value;
+  if (!pred) return;
+  const type = document.getElementById("rel-type").value;
+  const lag = parseInt(document.getElementById("rel-lag").value,10) || 0;
+  modalRelationships.push({ predecessor_id: pred, type, lag });
+  document.getElementById("rel-lag").value = "0";
+  renderRelList();
+}
+function removeRelationship(i){ modalRelationships.splice(i,1); renderRelList(); }
+function renderRelList(){
+  const el = document.getElementById("rel-list");
+  if (!modalRelationships.length){ el.innerHTML = `<div class="hint">No predecessors yet.</div>`; return; }
+  el.innerHTML = modalRelationships.map((r,i)=>{
+    const lagTxt = r.lag ? ` ${r.lag>0?"+":""}${r.lag}d` : "";
+    return `<div class="rel-row"><span>${r.predecessor_id} · ${r.type}${lagTxt}</span>
+      <button onclick="removeRelationship(${i})">Remove</button></div>`;
+  }).join("");
+}
 
 function onTypeChange(){
   const t=document.getElementById("m-type").value, dur=document.getElementById("m-dur");
   if (t === "milestone") { dur.value="0"; dur.disabled=true; } else { dur.disabled=false; }
 }
-function openModal(){ editingId=null; document.getElementById("modal-title").textContent="Add task";
-  ["m-id","m-name","m-pred","m-res"].forEach(i=>document.getElementById(i).value="");
+function openModal(){ editingId=null; modalRelationships=[]; document.getElementById("modal-title").textContent="Add task";
+  ["m-id","m-name","m-res"].forEach(i=>document.getElementById(i).value="");
   document.getElementById("m-dur").value="1"; document.getElementById("m-id").disabled=false;
   document.getElementById("m-type").value="task"; onTypeChange();
+  document.getElementById("m-budget").value="0"; document.getElementById("m-actual").value="0";
+  document.getElementById("m-pct").value="0";
+  populateRelPredOptions(null); renderRelList();
   document.getElementById("modal-bg").style.display="flex"; }
 function editActivity(json){ const a=JSON.parse(json); editingId=a.id;
   document.getElementById("modal-title").textContent="Edit task";
   document.getElementById("m-id").value=a.id; document.getElementById("m-id").disabled=true;
   document.getElementById("m-name").value=a.name; document.getElementById("m-dur").value=a.duration;
   document.getElementById("m-type").value=a.type||"task";
-  document.getElementById("m-pred").value=(a.predecessors||[]).join(", ");
-  document.getElementById("m-res").value=a.resource||""; onTypeChange();
+  document.getElementById("m-res").value=a.resource||"";
+  document.getElementById("m-budget").value=a.budget||0;
+  document.getElementById("m-actual").value=a.actual_cost||0;
+  document.getElementById("m-pct").value=a.percent_complete||0;
+  modalRelationships = (a.relationships||[]).map(r=>({predecessor_id:r.predecessor_id, type:r.type||"FS", lag:r.lag||0}));
+  populateRelPredOptions(a.id); renderRelList();
+  onTypeChange();
   document.getElementById("modal-bg").style.display="flex"; }
 function closeModal(){ document.getElementById("modal-bg").style.display="none"; }
 async function saveActivity(){
@@ -354,10 +489,15 @@ async function saveActivity(){
   const type=document.getElementById("m-type").value;
   let dur=parseInt(document.getElementById("m-dur").value,10);
   if (type==="milestone") dur=0;
-  const pred=document.getElementById("m-pred").value.split(",").map(s=>s.trim()).filter(Boolean);
   const res=document.getElementById("m-res").value.trim()||null;
+  const budget=parseFloat(document.getElementById("m-budget").value)||0;
+  const actual_cost=parseFloat(document.getElementById("m-actual").value)||0;
+  const percent_complete=parseInt(document.getElementById("m-pct").value,10)||0;
   if(!id||!name) return showErr("ID and name are required.");
-  const activity={id,name,duration:isNaN(dur)?0:dur,type,predecessors:pred,resource:res};
+  // `relationships` is canonical (ADR-0011); the API rebuilds `predecessors`
+  // from it, so there's nothing else to send for dependencies.
+  const activity={id,name,duration:isNaN(dur)?0:dur,type,resource:res,
+    relationships:modalRelationships, budget, actual_cost, percent_complete};
   try{
     if(editingId) await api("PUT", `${base()}/${currentProject}/activities/${editingId}`, activity);
     else await api("POST", `${base()}/${currentProject}/activities`, activity);
@@ -367,7 +507,7 @@ async function saveActivity(){
 async function deleteActivity(aid){ if(!confirm(`Delete task ${aid}?`)) return;
   try{ await api("DELETE", `${base()}/${currentProject}/activities/${aid}`); reschedule(); }catch(e){ showErr(e.message); } }
 
-(async function init(){ await loadPrefs(); showProjects(); })();
+(async function init(){ await loadPrefs(); await loadOrgCurrency(); showProjects(); })();
 </script>
 </body>
 </html>
