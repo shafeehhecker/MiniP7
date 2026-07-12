@@ -61,14 +61,26 @@ done, and a reusability contract — what downstream gets for free.
   the commons. Deferred to Phase 6: drag-to-reschedule, calendar dates on the
   Gantt (the engine supports them — ADR-0012 — the endpoint doesn't expose
   them yet), baseline overlay, zoom, export. The zero-build static UI in
-  `apps/api/static` remains in place as a lightweight fallback.
+  `apps/api/static` remains in place as a lightweight fallback and has been
+  brought current with Phase 2 (see below) — it is no longer stuck at Phase 1.
 
-## Built since: core-job web UI (superseded above)
+## Built since: core-job web UI
 
-A zero-build web app (served by the API) provided the core job end to end:
-sign up / log in, a projects list, create projects, add / edit / delete tasks
-through a form, run the schedule, and an interactive Gantt with dependency
-arrows. It remains available but Phase 5's React app is now the primary UI.
+A zero-build web app (served by the API, no npm/build step) provides the core
+job end to end: sign up / log in, a projects list, create projects, add /
+edit / delete tasks through a form, run the schedule, and an interactive
+Gantt. It originally only understood finish-to-start dependencies — a gap
+against Phase 2 that sat open until now. It has since been updated to match
+Phase 2 and Phase 5's EVM work: the task form builds typed relationships
+(FS/SS/FF/SF with lag, matching ADR-0011) instead of a plain comma-separated
+predecessor list; budget, actual cost, and percent-complete fields are on the
+form; the task table shows cost columns and typed predecessor labels
+(`D·SS+1d`); the Gantt draws all four relationship types, flagging
+start-to-finish links in the critical-path color since they're the type most
+often used by mistake; and a new Earned Value card calls the `/evm` endpoint
+for BAC/PV/EV/AC/SV/CV/SPI/CPI/EAC/VAC at a chosen status day. Phase 5's
+React app remains the primary UI for anyone running a Node toolchain; this
+one is for anyone who isn't.
 
 ## Built since: activity types, preferences, currency
 
