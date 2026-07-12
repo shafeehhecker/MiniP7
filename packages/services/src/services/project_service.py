@@ -13,9 +13,9 @@ from typing import List
 
 from schema import (
     Activity, Project, Organization, User, Membership, Role,
-    UserPreferences, Currency,
+    UserPreferences, Currency, EVMResult, Relationship, RelationshipType,
 )
-from engine import CPMScheduler, SchedulerError
+from engine import CPMScheduler, SchedulerError, compute_evm
 from auth import hash_password, verify_password, create_access_token
 
 __all__ = ["ProjectService", "ServiceError", "PermissionError_"]
@@ -225,17 +225,39 @@ class ProjectService:
             "activities": [a.model_dump() for a in project.activities],
         }
 
+    def evm(self, org_id: str, actor_id: str, project_id: str, as_of_day: int) -> EVMResult:
+        """Earned-value snapshot as of a working day.
+
+        Re-schedules first (CPM fields must be current for PV's linear accrual
+        to mean anything) then delegates to the pure engine function.
+        """
+        project = self.get_project(org_id, actor_id, project_id)
+        if not project.activities:
+            raise ServiceError("No activities to evaluate.")
+        acts = {a.id: a for a in project.activities}
+        try:
+            CPMScheduler(acts).schedule()
+        except SchedulerError as e:
+            raise ServiceError(str(e))
+        self._repo.save(project)
+        return compute_evm(project.activities, as_of_day)
+
     def load_sample(self, org_id: str, actor_id: str, project_id: str) -> Project:
         org = self._get_org(org_id)
         self._require_role(org, actor_id, _WRITE_ROLES)
         project = self.get_project(org_id, actor_id, project_id)
         project.activities = [
-            Activity(id="A", name="Start", duration=2),
-            Activity(id="B", name="Foundation", duration=4, predecessors=["A"]),
-            Activity(id="C", name="Structure", duration=6, predecessors=["B"]),
-            Activity(id="D", name="Electrical", duration=3, predecessors=["B"],
-                     resource="Electrical Team"),
-            Activity(id="E", name="Finish", duration=2, predecessors=["C", "D"]),
+            Activity(id="A", name="Start", duration=2, budget=2000,
+                     actual_cost=2000, percent_complete=100),
+            Activity(id="B", name="Foundation", duration=4, predecessors=["A"],
+                     budget=8000, actual_cost=8500, percent_complete=100),
+            Activity(id="C", name="Structure", duration=6, predecessors=["B"],
+                     budget=15000, actual_cost=9000, percent_complete=50),
+            Activity(id="D", name="Electrical", duration=3, resource="Electrical Team",
+                     budget=6000, actual_cost=1500, percent_complete=20,
+                     relationships=[Relationship(predecessor_id="B", type=RelationshipType.SS, lag=2)]),
+            Activity(id="E", name="Finish", duration=2, predecessors=["C", "D"],
+                     budget=3000),
         ]
         self._repo.save(project)
         return project
