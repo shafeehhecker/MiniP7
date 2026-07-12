@@ -30,6 +30,15 @@ does not exist yet.
   schema — enforced by the CI drift gate.
 - Compiles under `tsc --strict` — enforced in CI.
 
+## Consumers
+
+`apps/web` (Phase 5) depends on this package as `@minip7/client` via npm
+workspaces — see the root `package.json` and
+[apps/web/README.md](../../apps/web/README.md#where-the-types-come-from). It
+imports these types directly rather than redeclaring them, so a schema change
+that isn't reflected here fails the frontend's type-check, not just CI's
+drift gate.
+
 ## Dependencies
 
 `schema` (as its generation source). Nothing else.
