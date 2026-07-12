@@ -32,6 +32,23 @@ def test_sample_and_schedule(svc, owner):
     assert r["critical_path"] == ["A", "B", "C", "E"]
 
 
+def test_evm_schedules_first_then_computes(svc, owner):
+    org, proj = _org_with_project(svc, owner)
+    svc.load_sample(org, owner.id, proj)
+    # No schedule() call first — evm() must schedule internally, since PV's
+    # linear accrual is meaningless without ES/EF.
+    result = svc.evm(org, owner.id, proj, as_of_day=6)
+    assert result.bac == 2000 + 8000 + 15000 + 6000 + 3000
+    assert result.ac == 2000 + 8500 + 9000 + 1500  # E has no actual_cost yet
+    assert result.spi is not None and result.cpi is not None
+
+
+def test_evm_requires_activities(svc, owner):
+    org, proj = _org_with_project(svc, owner)
+    with pytest.raises(ServiceError, match="No activities"):
+        svc.evm(org, owner.id, proj, as_of_day=0)
+
+
 def test_projects_are_scoped_to_their_org(svc, owner):
     # Two orgs, each with a project. One owner is in both; a stranger in neither.
     svc.create_organization("acme", "Acme", owner)
