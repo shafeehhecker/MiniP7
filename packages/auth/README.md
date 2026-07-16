@@ -26,3 +26,4 @@ decode to derive the current user on every protected route.
 ```bash
 pytest packages/auth/tests
 ```
+nill
