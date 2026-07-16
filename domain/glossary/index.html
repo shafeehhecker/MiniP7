@@ -1,0 +1,1191 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CPM scheduler built on commons + documentation-as-a-product">
+      
+      
+      
+      
+        <link rel="prev" href="../../architecture/commons/">
+      
+      
+        <link rel="next" href="../../reference/package-readme-template/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Glossary - Mini-P7 Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#domain-glossary" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Mini-P7 Documentation" class="md-header__button md-logo" aria-label="Mini-P7 Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Mini-P7 Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Glossary
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Mini-P7 Documentation" class="md-nav__button md-logo" aria-label="Mini-P7 Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Mini-P7 Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-to
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-to
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/adding-a-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a commons package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/regenerating-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regenerate TypeScript types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/commons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commons registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling-cpm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheduling (CPM)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#earned-value-management-evm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Earned Value Management (EVM)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preferences-organization-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preferences &amp; organization settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calendars-see-adr-0012" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calendars (see ADR-0012)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#earned-value-see-adr-0013" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Earned value (see ADR-0013)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/package-readme-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package README template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understand
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Understand
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cpm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How CPM works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ROADMAP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../REPO_STRATEGY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DOCUMENTATION_STANDARDS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decision log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling-cpm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scheduling (CPM)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#earned-value-management-evm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Earned Value Management (EVM)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preferences-organization-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preferences &amp; organization settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calendars-see-adr-0012" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calendars (see ADR-0012)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#earned-value-see-adr-0013" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Earned value (see ADR-0013)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="domain-glossary">Domain glossary</h1>
+<blockquote>
+<p>Category: <strong>Reference</strong>. Every domain term is defined once, here. No other
+document redefines these — they link here instead. This is the project's shared
+language.</p>
+</blockquote>
+<h2 id="scheduling-cpm">Scheduling (CPM)</h2>
+<p><strong>Activity</strong> — A unit of work with a duration and dependencies. The atom of a
+schedule.</p>
+<p><strong>Activity type</strong> — The kind of an activity, which governs how it schedules:
+<strong>task</strong> (ordinary work with a duration), <strong>milestone</strong> (a zero-duration marker
+for a point in time), <strong>level of effort</strong> (sustained work whose span is driven by
+other activities), and <strong>summary</strong> (a roll-up of the activities beneath a WBS
+node). Task, milestone and level-of-effort are fully scheduled today (an LOE spans
+the activities it supports — see <a href="../../adr/0011-typed-relationships/">ADR-0011</a>);
+summary is modelled and scheduled as a task until the WBS lands
+(see <a href="../../adr/0008-activity-types/">ADR-0008</a>).</p>
+<p><strong>Milestone</strong> — A zero-duration activity marking a point in time, such as a
+deliverable or a gate. A milestone always has <code>duration == 0</code>.</p>
+<p><strong>Level of effort (LOE)</strong> — An activity whose duration is determined by the
+activities it supports rather than by its own estimate (e.g. project management
+running for the life of a phase).</p>
+<p><strong>Summary activity</strong> — An activity that summarises the work of a WBS branch,
+rolling up the dates of its children.</p>
+<p><strong>Duration</strong> — How long an activity takes, in working days. May be zero (a
+milestone).</p>
+<p><strong>Predecessor / Successor</strong> — If B depends on A, then A is a predecessor of B and
+B is a successor of A.</p>
+<p><strong>Relationship</strong> — A typed dependency between two activities, with an optional
+lag. Four types: <strong>FS</strong> (finish-to-start), <strong>SS</strong> (start-to-start), <strong>FF</strong>
+(finish-to-finish), <strong>SF</strong> (start-to-finish). FS is the default and by far the
+most common.</p>
+<p><strong>Lag</strong> — A delay added to a relationship (e.g. "B starts 2 days after A finishes"
+is FS + 2 lag). Negative lag is a <em>lead</em>.</p>
+<p><strong>ES / EF — Early Start / Early Finish</strong> — The earliest an activity can start and
+finish, computed in the forward pass. <code>EF = ES + Duration</code>.</p>
+<p><strong>LS / LF — Late Start / Late Finish</strong> — The latest an activity can start and
+finish without delaying the project, computed in the backward pass.
+<code>LS = LF − Duration</code>.</p>
+<p><strong>Total float (TF)</strong> — Slack: how long an activity can slip without delaying the
+project. <code>TF = LS − ES</code>.</p>
+<p><strong>Free float (FF)</strong> — How long an activity can slip without delaying <em>any</em> of its
+successors or the project finish: the tightest relationship slack toward any
+successor, bounded by <code>project finish − EF</code>. Always <code>FF ≤ TF</code>
+(see <a href="../../adr/0011-typed-relationships/">ADR-0011</a>).</p>
+<p><strong>Critical path</strong> — The longest path through the network; the chain of activities
+with zero total float. Delaying any of them delays the whole project.</p>
+<p><strong>Forward pass</strong> — The left-to-right sweep computing ES/EF from the start.</p>
+<p><strong>Backward pass</strong> — The right-to-left sweep computing LS/LF from the end.</p>
+<p><strong>Data date</strong> — The "as-of" date dividing actuals (past) from plan (future). Used
+when a schedule is in progress.</p>
+<p><strong>Calendar</strong> — The definition of working vs non-working time (e.g. Mon–Fri skips
+weekends). Durations are measured in <em>working</em> days against a calendar.</p>
+<p><strong>WBS — Work Breakdown Structure</strong> — The hierarchical decomposition of the project
+into nested groups of work. Activities live at the leaves.</p>
+<p><strong>Baseline</strong> — A saved snapshot of the schedule used to compare plan vs actual.</p>
+<h2 id="resources">Resources</h2>
+<p><strong>Resource</strong> — Labour or equipment that performs work (e.g. "Electrical Team",
+"Tower Crane 1").</p>
+<p><strong>Assignment</strong> — A link between a resource and an activity, with an allocation
+(units or percentage).</p>
+<p><strong>Resource loading</strong> — Total demand on a resource over time, often shown as a
+heatmap or histogram. Over-allocation is when demand exceeds capacity.</p>
+<p><strong>Levelling</strong> — Adjusting the schedule to remove resource over-allocation.</p>
+<h2 id="earned-value-management-evm">Earned Value Management (EVM)</h2>
+<p><strong>PV / BCWS — Planned Value</strong> — The budgeted cost of work <em>scheduled</em> by the data
+date.</p>
+<p><strong>EV / BCWP — Earned Value</strong> — The budgeted cost of work <em>actually performed</em> by
+the data date.</p>
+<p><strong>AC / ACWP — Actual Cost</strong> — The real cost of the work performed.</p>
+<p><strong>SV — Schedule Variance</strong> — <code>EV − PV</code>. Negative means behind schedule.</p>
+<p><strong>CV — Cost Variance</strong> — <code>EV − AC</code>. Negative means over budget.</p>
+<p><strong>SPI — Schedule Performance Index</strong> — <code>EV / PV</code>. Below 1.0 means behind schedule.</p>
+<p><strong>CPI — Cost Performance Index</strong> — <code>EV / AC</code>. Below 1.0 means over budget.</p>
+<p><strong>BAC — Budget at Completion</strong> — The total planned budget.</p>
+<p><strong>EAC — Estimate at Completion</strong> — The forecast total cost, commonly <code>BAC / CPI</code>.</p>
+<h2 id="preferences-organization-settings">Preferences &amp; organization settings</h2>
+<p><strong>User preferences</strong> — Per-user display settings that never change the computed
+schedule: a colour <strong>theme</strong>, the <strong>units</strong> durations are shown in, and a <strong>date
+format</strong>. Embedded in the user (see <a href="../../adr/0007-user-preferences/">ADR-0007</a>).</p>
+<p><strong>Units</strong> — Whether a user sees durations in <strong>days</strong> or <strong>hours</strong> (an 8-hour
+working day). The engine always computes in days; units are presentation only.</p>
+<p><strong>Date format</strong> — How calendar dates are rendered for a user (ISO, US, or EU).
+Takes effect once the calendar maps day-offsets to real dates.</p>
+<p><strong>Theme</strong> — A user's colour preference: light, dark, or follow the system.</p>
+<p><strong>Currency</strong> — The ISO 4217 currency an organization's monetary values are
+expressed in (code, symbol, name), set per organization. A display setting until
+cost rollups exist (see <a href="../../adr/0009-currency/">ADR-0009</a>).</p>
+<h2 id="calendars-see-adr-0012">Calendars (see <a href="../../adr/0012-calendars/">ADR-0012</a>)</h2>
+<p><strong>Calendar</strong> — The working-time definition: which weekdays count as working
+days plus specific holiday dates. The engine always computes in working days;
+a calendar and a project start date map those offsets onto real dates.</p>
+<p><strong>Working day 0</strong> — The first working date on or after the project start date.
+An activity occupies working days <code>ES..EF−1</code>; a milestone occurs at day <code>ES</code>.</p>
+<h2 id="earned-value-see-adr-0013">Earned value (see <a href="../../adr/0013-earned-value/">ADR-0013</a>)</h2>
+<p><strong>BAC — Budget at completion</strong> — The total budget: the sum of every activity's
+budget.</p>
+<p><strong>PV / BCWS — Planned value</strong> — The budget that <em>should</em> have been consumed by
+the status day, accruing linearly across each activity's scheduled span.</p>
+<p><strong>EV / BCWP — Earned value</strong> — The budgeted worth of work actually performed:
+<code>budget × percent complete</code> per activity.</p>
+<p><strong>AC / ACWP — Actual cost</strong> — Money actually spent to date.</p>
+<p><strong>SV / CV — Schedule / cost variance</strong> — <code>SV = EV − PV</code> (negative = behind
+schedule); <code>CV = EV − AC</code> (negative = over budget).</p>
+<p><strong>SPI / CPI — Schedule / cost performance index</strong> — <code>SPI = EV ÷ PV</code>,
+<code>CPI = EV ÷ AC</code>. <code>None</code> when the denominator is zero — "no data yet" is never
+"exactly on plan".</p>
+<p><strong>EAC / ETC / VAC</strong> — Forecasts assuming current cost performance continues:
+estimate at completion <code>EAC = BAC ÷ CPI</code>, estimate to complete
+<code>ETC = EAC − AC</code>, variance at completion <code>VAC = BAC − EAC</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "content.code.copy", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

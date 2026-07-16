@@ -1,0 +1,1250 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CPM scheduler built on commons + documentation-as-a-product">
+      
+      
+      
+      
+        <link rel="prev" href="../domain/cpm/">
+      
+      
+        <link rel="next" href="../REPO_STRATEGY/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Roadmap - Mini-P7 Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#roadmap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Mini-P7 Documentation" class="md-header__button md-logo" aria-label="Mini-P7 Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Mini-P7 Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Roadmap
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Mini-P7 Documentation" class="md-nav__button md-logo" aria-label="Mini-P7 Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Mini-P7 Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-to
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-to
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/adding-a-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a commons package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/regenerating-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regenerate TypeScript types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/commons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commons registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../domain/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/package-readme-template/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package README template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understand
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Understand
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../domain/cpm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How CPM works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#phase-0-repository-toolchain-commons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0 — Repository &amp; toolchain commons ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-1-domain-schema-commons-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 — Domain schema commons (schema) ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-2-core-engine-commons-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 — Core engine commons (engine) ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-3-services-persistence-commons-services-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 — Services + persistence commons (services, persistence)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-4-api-contract-typed-client-commons-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4 — API contract + typed client commons (client)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-5-ui-commons-ui-first-cut" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5 — UI commons (ui) ✅ (first cut)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-since-core-job-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built since: core-job web UI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-since-activity-types-preferences-currency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built since: activity types, preferences, currency
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phases-6-feature-verticals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phases 6+ — Feature verticals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../REPO_STRATEGY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCUMENTATION_STANDARDS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decision log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#phase-0-repository-toolchain-commons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0 — Repository &amp; toolchain commons ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-1-domain-schema-commons-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 — Domain schema commons (schema) ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-2-core-engine-commons-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 — Core engine commons (engine) ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-3-services-persistence-commons-services-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 — Services + persistence commons (services, persistence)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-4-api-contract-typed-client-commons-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4 — API contract + typed client commons (client)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-5-ui-commons-ui-first-cut" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5 — UI commons (ui) ✅ (first cut)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-since-core-job-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built since: core-job web UI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-since-activity-types-preferences-currency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built since: activity types, preferences, currency
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phases-6-feature-verticals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phases 6+ — Feature verticals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="roadmap">Roadmap</h1>
+<blockquote>
+<p>Category: <strong>Explanation</strong>. The delivery plan. Each phase produces exactly one
+reusable commons that later phases consume. For the packages themselves, see
+<a href="../architecture/commons/">the commons registry</a>.</p>
+</blockquote>
+<p>Each phase has an objective, a single deliverable (the commons), a definition of
+done, and a reusability contract — what downstream gets for free.</p>
+<h2 id="phase-0-repository-toolchain-commons">Phase 0 — Repository &amp; toolchain commons ✅</h2>
+<ul>
+<li><strong>Deliverable:</strong> the monorepo, CI, shared configs, commit conventions, ADR process.</li>
+<li><strong>Done when:</strong> a trivial package can be added, tested, and released through CI.</li>
+<li><strong>Reuse:</strong> every later package inherits CI, versioning, and conventions.</li>
+<li><strong>Status:</strong> done. <code>.github/workflows/ci.yml</code> runs the test suites (3.11/3.12),
+  enforces the dependency rule with import-linter, gates schema→TypeScript
+  drift, and builds + deploys the docs site strictly.</li>
+</ul>
+<h2 id="phase-1-domain-schema-commons-schema">Phase 1 — Domain schema commons (<code>schema</code>) ✅</h2>
+<ul>
+<li><strong>Deliverable:</strong> the canonical model in Pydantic, generating TypeScript types.</li>
+<li><strong>Done when:</strong> a model change regenerates both languages in one command and CI
+  fails on drift.</li>
+<li><strong>Reuse:</strong> every package and both languages share one definition.</li>
+<li><strong>Status:</strong> done. <code>python tooling/codegen/generate_ts.py</code> regenerates
+  <code>packages/client/src/models.ts</code>; CI fails on drift and type-checks the output
+  with <code>tsc --strict</code> (<a href="../adr/0010-typescript-codegen-tooling/">ADR-0010</a>).</li>
+</ul>
+<h2 id="phase-2-core-engine-commons-engine">Phase 2 — Core engine commons (<code>engine</code>) ✅</h2>
+<ul>
+<li><strong>Deliverable:</strong> pure CPM extended for calendars and relationship types, plus EVM.</li>
+<li><strong>Done when:</strong> it passes property-based tests and runs identically in tests, the
+  CLI, and batch jobs.</li>
+<li><strong>Reuse:</strong> the single source of scheduling truth for every interface.</li>
+<li><strong>Status:</strong> done. All four relationship types (FS/SS/FF/SF) with lag
+  (<a href="../adr/0011-typed-relationships/">ADR-0011</a>), calendars mapping working days
+  to real dates (<a href="../adr/0012-calendars/">ADR-0012</a>), earned value
+  (<a href="../adr/0013-earned-value/">ADR-0013</a>), and level-of-effort spanning
+  (completing ADR-0008). Guarded by a Hypothesis property-based suite that
+  found and now permanently guards against a real float-hierarchy bug.</li>
+</ul>
+<h2 id="phase-3-services-persistence-commons-services-persistence">Phase 3 — Services + persistence commons (<code>services</code>, <code>persistence</code>)</h2>
+<ul>
+<li><strong>Deliverable:</strong> storage-agnostic repositories and the orchestration layer.</li>
+<li><strong>Done when:</strong> the same service tests pass against an in-memory repo and a real DB.</li>
+<li><strong>Reuse:</strong> API and CLI drive identical business logic.</li>
+</ul>
+<h2 id="phase-4-api-contract-typed-client-commons-client">Phase 4 — API contract + typed client commons (<code>client</code>)</h2>
+<ul>
+<li><strong>Deliverable:</strong> FastAPI server and a TypeScript client generated from its OpenAPI.</li>
+<li><strong>Done when:</strong> a breaking API change fails the frontend build at compile time.</li>
+<li><strong>Reuse:</strong> the frontend never hand-writes a fetch call or a response type.</li>
+</ul>
+<h2 id="phase-5-ui-commons-ui-first-cut">Phase 5 — UI commons (<code>ui</code>) ✅ (first cut)</h2>
+<ul>
+<li><strong>Deliverable:</strong> design tokens, primitives, wrapped Gantt + data grid, data hooks.</li>
+<li><strong>Done when:</strong> a new view is assembled from primitives with zero raw styling.</li>
+<li><strong>Reuse:</strong> every feature vertical is composition, not construction.</li>
+<li><strong>Status:</strong> the React migration mentioned below as "an option" has happened.
+  <code>apps/web</code> (React + TypeScript + Tailwind + Vite) now covers auth, project
+  and activity CRUD, scheduling, an interactive Gantt drawing all four
+  relationship types, and earned value — built from a small primitive set
+  (<code>Button</code>/<code>Input</code>/<code>Select</code>/<code>Modal</code>/<code>Card</code>/<code>Table</code>/<code>Badge</code>/<code>Alert</code>) under a
+  drafting-table design system (<a href="../adr/0014-frontend-stack/">ADR-0014</a>). It
+  consumes <code>packages/client</code> as a real npm-workspace dependency, so the
+  frontend/backend type contract has the same drift protection as the rest of
+  the commons. Deferred to Phase 6: drag-to-reschedule, calendar dates on the
+  Gantt (the engine supports them — ADR-0012 — the endpoint doesn't expose
+  them yet), baseline overlay, zoom, export. The zero-build static UI in
+  <code>apps/api/static</code> remains in place as a lightweight fallback and has been
+  brought current with Phase 2 (see below) — it is no longer stuck at Phase 1.</li>
+</ul>
+<h2 id="built-since-core-job-web-ui">Built since: core-job web UI</h2>
+<p>A zero-build web app (served by the API, no npm/build step) provides the core
+job end to end: sign up / log in, a projects list, create projects, add /
+edit / delete tasks through a form, run the schedule, and an interactive
+Gantt. It originally only understood finish-to-start dependencies — a gap
+against Phase 2 that sat open until now. It has since been updated to match
+Phase 2 and Phase 5's EVM work: the task form builds typed relationships
+(FS/SS/FF/SF with lag, matching ADR-0011) instead of a plain comma-separated
+predecessor list; budget, actual cost, and percent-complete fields are on the
+form; the task table shows cost columns and typed predecessor labels
+(<code>D·SS+1d</code>); the Gantt draws all four relationship types, flagging
+start-to-finish links in the critical-path color since they're the type most
+often used by mistake; and a new Earned Value card calls the <code>/evm</code> endpoint
+for BAC/PV/EV/AC/SV/CV/SPI/CPI/EAC/VAC at a chosen status day. Phase 5's
+React app remains the primary UI for anyone running a Node toolchain; this
+one is for anyone who isn't.</p>
+<h2 id="built-since-activity-types-preferences-currency">Built since: activity types, preferences, currency</h2>
+<p>Three feature increments landed on top of the commons without changing the
+dependency graph (each is documented by an ADR):</p>
+<ul>
+<li><strong>Activity types</strong> (task / milestone / level-of-effort / summary) — schema +
+  engine + UI, with task and milestone fully scheduled
+  (<a href="../adr/0008-activity-types/">ADR-0008</a>).</li>
+<li><strong>User preferences</strong> (theme / units / date format) — embedded in the user and
+  applied in the UI (<a href="../adr/0007-user-preferences/">ADR-0007</a>).</li>
+<li><strong>Organization currency</strong> — an ISO 4217 setting per organization, ready for
+  costs (<a href="../adr/0009-currency/">ADR-0009</a>).</li>
+</ul>
+<h2 id="phases-6-feature-verticals">Phases 6+ — Feature verticals</h2>
+<p>Schedule/Gantt, Resources &amp; loading, Costs &amp; EVM, Dashboard/Portfolio, then
+Risks/Issues/Docs. These consume all the commons. When a vertical finds shared
+logic, it pushes it <em>down</em> into a commons — never sideways into another vertical.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
